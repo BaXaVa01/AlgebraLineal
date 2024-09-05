@@ -44,11 +44,15 @@ def printResult(matrix: list):
         row_has_nonzero = any(matrix[i][j] != 0 for j in range(m - 1))
         
         # Caso inconsistente
+        '''Si una fila no tiene ceros y el valor en la última columna es diferente de 0,
+        se marca como inconsistente'''
         if not row_has_nonzero and matrix[i][-1] != 0:
             inconsistente = True
             break
         
         # Caso de fila de ceros
+        '''Si una fila tiene ceros en todas las columnas y el valor en la última columna es 0,
+        se marca como que tiene infinitas soluciones'''
         if all(matrix[i][j] == 0 for j in range(m - 1)) and matrix[i][-1] == 0:
             infinitas_soluciones = True
             continue

@@ -2,7 +2,7 @@ from funcionesMatrices.pivoteo import *
 import tkinter as tk
 from tkinter import simpledialog
 import sys
-
+import os
 
 def main():
     salir=False
@@ -18,7 +18,15 @@ def main():
 
             printMatrix(matrix)
             printResult(matrix)
+           
+            
             print("Deseas resolver otra matriz?")
+           #me molestaba que no hiciera cls
+            input_text = input("Ingrese 's' para resolver otra matriz o cualquier otra tecla para salir: ")
+            if input_text.lower() == 's':
+                os.system('cls')
+            else:
+                salir = True
     
     
 

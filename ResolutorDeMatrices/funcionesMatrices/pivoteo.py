@@ -4,6 +4,10 @@ from funcionesMatrices.matrixFunctions import *
 
 
 def pivoteoMax(matrix):
+    '''Se recorre la matriz iniciando desde 0,0, row y column
+    siempre son el mismo valor, a menos que hayan más columnas que filas
+    en ese caso dejan de aumentar.
+    '''
     row:int = 0
     for column in range(len(matrix[0])- 1):
         
@@ -49,6 +53,10 @@ def pivoteoMax(matrix):
         
         
 def hacer_uno_el_pivote(matrix, row, column):  
+    '''
+    Esta funcion lo que hace es hacer que el pivote sea 1, si el pivote es 0
+    se busca una fila que tenga un pivote diferente de 0 y se intercambian las filas
+    '''
     # COMPROBAR SI EL PIVOTE 1 ES 0:
     if matrix[row][column] == 0:
     
@@ -68,6 +76,9 @@ def hacer_uno_el_pivote(matrix, row, column):
                   
 
 def liberar_columna_pivote(matrix,row,column):
+    '''Después de obtener el pivote con la funcion anterior hace que los nums
+    en la misma columna pero una fila debajo sean 0
+    '''
     newColumn=hacer_uno_el_pivote(matrix,row,column)
     if matrix[row][newColumn] != 1 and matrix[row][newColumn] != 0:
             #Aqui lo unico qeu hace es imprimir la operacion que hace: en caso de la primera iteracion imprimiria:

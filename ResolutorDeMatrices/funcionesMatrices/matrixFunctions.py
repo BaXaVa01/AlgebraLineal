@@ -1,5 +1,7 @@
 def multiplyRow(row:list, multiply):
-    """Esta funcion lo que hace es muiltiplicar una fila: {row} por el segundo parametro {multiply}"""
+    
+    """Esta funcion lo que hace es muiltiplicar una fila: {row}
+      por el segundo parametro {multiply} que es un numero"""
 
     for index in range(len(row)):
         row[index] *= multiply
@@ -9,7 +11,8 @@ def multiplyRow(row:list, multiply):
 def OperateRows(rowFrom:list , rowAuxiliar:list, operation:bool) -> list:
     """
     \n operation:bool -> true: sumar , false: restar
-    \nNOTE: AMBAS FILAS TIENEN QUE TENER EL MISMO TAMANIO
+    \nNOTE: AMBAS FILAS TIENEN QUE TENER EL MISMO TAMAÑO PARA PODER
+    REALIZAR LA OPERACION
     """
 
     if len(rowFrom) != len(rowAuxiliar):
