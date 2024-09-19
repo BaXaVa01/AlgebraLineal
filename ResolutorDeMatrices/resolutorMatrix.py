@@ -4,7 +4,7 @@ from tkinter import simpledialog
 import sys
 import os
 
-def main():
+def resolverMatriz():
     salir=False
     while salir==False:
         matrix=obtener_matriz_desde_input()
@@ -44,4 +44,4 @@ def obtener_matriz_desde_input():
         print("Operación cancelada. Saliendo del programa.")
         sys.exit()  # Detiene la ejecución del programa
 
-main()
+resolverMatriz()
