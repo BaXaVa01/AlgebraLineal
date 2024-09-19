@@ -26,6 +26,13 @@ def multiplicar_vectores(vector_a, vector_b):
     # Multiplicación elemento a elemento
     return [a * b for a, b in zip(vector_a, vector_b)]
 
+def producto_punto(vector_a, vector_b):
+    if len(vector_a) != len(vector_b):
+        raise ValueError("Los vectores deben tener la misma longitud.")
+    
+    # Producto punto
+    return sum(a * b for a, b in zip(vector_a, vector_b))
+
 def procesar_operacion():
     try:
         if var_tipo_operacion.get() == "Matrices":
@@ -45,12 +52,20 @@ def procesar_operacion():
             vector_a = eval(entry_matriz_a.get())
             vector_b = eval(entry_matriz_b.get())
 
-            # Realizar la multiplicación de vectores
-            resultado = multiplicar_vectores(vector_a, vector_b)
+            if var_tipo_vector.get() == "Elemento a elemento":
+                # Realizar la multiplicación de vectores (elemento a elemento)
+                resultado = multiplicar_vectores(vector_a, vector_b)
 
-            # Mostrar el resultado en un cuadro de mensaje
-            resultado_texto = "Vector resultado: [" + ", ".join(map(str, resultado)) + "]"
-            messagebox.showinfo("Resultado", resultado_texto)
+                # Mostrar el resultado en un cuadro de mensaje
+                resultado_texto = "Vector resultado: [" + ", ".join(map(str, resultado)) + "]"
+                messagebox.showinfo("Resultado", resultado_texto)
+
+            elif var_tipo_vector.get() == "Producto punto":
+                # Realizar el producto punto
+                resultado = producto_punto(vector_a, vector_b)
+
+                # Mostrar el resultado en un cuadro de mensaje
+                messagebox.showinfo("Resultado", f"Producto punto: {resultado}")
 
     except Exception as e:
         messagebox.showerror("Error", str(e))
@@ -69,7 +84,13 @@ tk.Label(ventana, text="Seleccione el tipo de operación", font=font_size).pack(
 # Opción de operación (Matrices o Vectores)
 var_tipo_operacion = tk.StringVar(value="Matrices")
 tk.Radiobutton(ventana, text="Multiplicar Matrices", variable=var_tipo_operacion, value="Matrices", font=font_size).pack()
-tk.Radiobutton(ventana, text="Multiplicar Vectores", variable=var_tipo_operacion, value="Vectores", font=font_size).pack()
+tk.Radiobutton(ventana, text="Vectores", variable=var_tipo_operacion, value="Vectores", font=font_size).pack()
+
+# Etiqueta para seleccionar el tipo de operación con vectores (Elemento a elemento o Producto punto)
+tk.Label(ventana, text="Seleccione el tipo de multiplicación para vectores", font=font_size).pack(pady=10)
+var_tipo_vector = tk.StringVar(value="Elemento a elemento")
+tk.Radiobutton(ventana, text="Multiplicación elemento a elemento", variable=var_tipo_vector, value="Elemento a elemento", font=font_size).pack()
+tk.Radiobutton(ventana, text="Producto punto", variable=var_tipo_vector, value="Producto punto", font=font_size).pack()
 
 # Etiquetas y cuadros de texto para las matrices o vectores
 tk.Label(ventana, text="Ingrese la primera matriz o vector (ej. [[1, 2], [3, 4]] o [1, 2, 3])", font=font_size).pack(pady=10)
@@ -86,3 +107,4 @@ boton_procesar.pack(pady=20)
 
 # Iniciar la aplicación
 ventana.mainloop()
+
