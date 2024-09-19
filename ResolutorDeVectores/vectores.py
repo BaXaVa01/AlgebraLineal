@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from fractions import Fraction
 
 class Vector:
     def __init__(self, components):
@@ -60,7 +61,7 @@ def calculate():
             components = [float(vector_entries[i][j].get()) for j in range(dim)]
             vectors.append(Vector(components))
 
-        scalars = [float(scalar_entries[i].get()) for i in range(num_vectors)]
+        scalars = [Fraction(scalar_entries[i].get()) for i in range(num_vectors)]
 
         result_vector = scalars[0] * vectors[0]
         result_details = [f"{scalars[0]} * {vectors[0]} = {result_vector}"]
