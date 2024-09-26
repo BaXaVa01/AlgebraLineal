@@ -27,7 +27,7 @@ def OperateRows(rowFrom:list , rowAuxiliar:list, operation:bool) -> list:
 
     for index in range(len(rowFrom)):
         
-        rowFrom[index] = rowFrom[index] + auxRow[index]
+        rowFrom[index] = round(rowFrom[index] + auxRow[index])
 
     
     return rowFrom

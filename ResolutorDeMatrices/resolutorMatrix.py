@@ -4,6 +4,7 @@ from tkinter import simpledialog
 import sys
 import os
 
+
 def resolverMatriz():
     salir=False
     while salir==False:

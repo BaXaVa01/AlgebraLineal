@@ -1,7 +1,7 @@
 from funcionesMatrices.printing import *
 from funcionesMatrices.reemplazar import reemplazarFila, alternarFilas
 from funcionesMatrices.matrixFunctions import *
-
+from fractions import Fraction
 
 def pivoteoMax(matrix):
     '''Se recorre la matriz iniciando desde 0,0, row y column
@@ -13,6 +13,10 @@ def pivoteoMax(matrix):
         
         if row > len(matrix) - 1:
             row = len(matrix) - 1
+        
+        #Se busca que cuando el numero de columnas sea mayor que el de filas, se detenga
+        if column > len(matrix) - 1:
+            break
 
         column=column + liberar_columna_pivote(matrix, row, column)
         
@@ -27,7 +31,7 @@ def pivoteoMax(matrix):
             if operation: operacionString = " + "
             print(f"F{fila + 1}=> F{fila + 1}{operacionString}{abs(matrix[fila][column])}*F{row + 1} \n") 
 
-            matrix[fila] = OperateRows(matrix[fila], multiplyRow(matrix[row][:],abs(matrix[fila][column])), operation )
+            matrix[fila] = OperateRows(matrix[fila], multiplyRow(matrix[row][:],abs(matrix[fila][column])), operation)
 
             
             
