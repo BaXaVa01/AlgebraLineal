@@ -67,7 +67,7 @@ def printResult(matrix: list):
                         pivot_index = j
                         equation += f"x{j+1} = "
                     else:
-                        sign = '+' if coef > 0 else '-'
+                        sign = '-' if coef > 0 else '+'
                         equation += f" {sign} {abs(coef)}x{j+1}"
             
             if matrix[i][-1] != 0:
