@@ -34,6 +34,7 @@ sidebar_visible = False
 buttons = []  
 model = LatexOCR()
 
+<<<<<<< HEAD
     
 def biseccion(f, a, b, E=1e-5, max_iter=100):
     """
@@ -63,6 +64,28 @@ def biseccion(f, a, b, E=1e-5, max_iter=100):
                 return c, 0, pasos, iter_count + 1  # La raíz exacta ha sido encontrada
             elif f(a) * f(c) < 0:
                 b = c
+=======
+def resolverMatriz():
+    while salir==False:
+        matrix=obtener_matriz_desde_input()
+        if validar_matriz(matrix):
+            
+            printMatrix(matrix)
+            pivoteoMax(matrix)
+
+            print("##############################")
+            print("resultados:")
+
+            printMatrix(matrix)
+            printResult(matrix)
+           
+            
+            print("Deseas resolver otra matriz?")
+           #me molestaba que no hiciera cls
+            input_text = input("Ingrese 's' para resolver otra matriz o cualquier otra tecla para salir: ")
+            if input_text.lower() == 's':
+                os.system('cls')
+>>>>>>> 16f6a10 (new)
             else:
                 a = c
             
