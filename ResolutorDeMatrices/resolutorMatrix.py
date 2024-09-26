@@ -6,7 +6,6 @@ import os
 
 
 def resolverMatriz():
-    salir=False
     while salir==False:
         matrix=obtener_matriz_desde_input()
         if validar_matriz(matrix):
