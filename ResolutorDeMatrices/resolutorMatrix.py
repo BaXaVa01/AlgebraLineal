@@ -18,6 +18,102 @@ consola_pasos_determinante_visible = True
 matriz_suma_global = None  # Variable global para almacenar la matriz sumada
 global_font_size = 12
 
+
+def calcular_determinante(matriz):
+    """
+    Calcula el determinante de una matriz cuadrada.
+    """
+    # Caso base para una matriz 2x2
+    if len(matriz) == 2 and len(matriz[0]) == 2:
+        return matriz[0][0] * matriz[1][1] - matriz[0][1] * matriz[1][0]
+
+    # Recursión para matrices de mayor tamaño
+    determinante_total = 0
+    for columna in range(len(matriz)):
+        # Crear la submatriz excluyendo la primera fila y la columna actual
+        submatriz = [fila[:columna] + fila[columna+1:] for fila in matriz[1:]]
+        cofactor = ((-1) ** columna) * matriz[0][columna] * calcular_determinante(submatriz)
+        determinante_total += cofactor
+    
+    return determinante_total
+
+
+def reemplazar_columna(matriz, columna, valores):
+    """
+    Reemplaza una columna en la matriz por los valores del vector.
+    """
+    matriz_modificada = [fila[:] for fila in matriz]  # Hacer una copia profunda de la matriz
+    for i in range(len(matriz)):
+        matriz_modificada[i][columna] = valores[i]
+    return matriz_modificada
+
+
+def resolver_sistema_cramer(coeficientes, resultados):
+    """
+    Resuelve un sistema de ecuaciones lineales utilizando la regla de Cramer.
+    
+    Parámetros:
+        coeficientes (list of lists): Matriz de coeficientes del sistema.
+        resultados (list): Vector de resultados independientes.
+    
+    Retorna:
+        tuple: Vector de soluciones y los pasos realizados.
+    """
+    # Calcular el determinante de la matriz de coeficientes
+    det_principal = calcular_determinante(coeficientes)
+    
+    # Verificar si el sistema tiene solución única (det != 0)
+    if det_principal == 0:
+        return None, "El sistema no tiene solución única (determinante es 0)."
+    
+    # Calcular los determinantes de las matrices modificadas y encontrar las soluciones
+    soluciones = []
+    pasos = "Pasos realizados:\n"
+    pasos += f"Determinante de la matriz de coeficientes: {det_principal}\n"
+    
+    for i in range(len(resultados)):
+        # Reemplazar la columna i con los resultados independientes
+        matriz_modificada = reemplazar_columna(coeficientes, i, resultados)
+        det_modificado = calcular_determinante(matriz_modificada)
+        solucion = det_modificado / det_principal
+        soluciones.append(solucion)
+
+        # Añadir detalles a los pasos
+        pasos += f"Determinante con columna {i+1} reemplazada: {det_modificado}\n"
+        pasos += f"Solución {i+1}: x{i+1} = {solucion}\n"
+
+    return soluciones, pasos
+
+
+def resolver_por_cramer_interface():
+    try:
+        # Obtener el texto de la matriz de coeficientes y el vector de resultados ingresados
+        coeficientes_str = matriz_input_cramer.get("1.0", ctk.END).strip()
+        resultados_str = vector_resultados_input.get("1.0", ctk.END).strip()
+
+        # Convertir las entradas en listas de listas (para coeficientes) y listas simples (para resultados)
+        coeficientes = [list(map(float, fila.split())) for fila in coeficientes_str.split("\n")]
+        resultados = list(map(float, resultados_str.split()))
+
+        # Resolver el sistema usando la regla de Cramer
+        soluciones, pasos = resolver_sistema_cramer(coeficientes, resultados)
+
+        # Mostrar el resultado en la consola
+        consola_cramer.delete("1.0", ctk.END)
+        if soluciones:
+            consola_cramer.insert(ctk.END, f"Soluciones: {soluciones}\n")
+        else:
+            consola_cramer.insert(ctk.END, pasos)
+
+        # Mostrar los pasos realizados
+        consola_pasos_cramer.delete("1.0", ctk.END)
+        consola_pasos_cramer.insert(ctk.END, pasos)
+
+    except Exception as e:
+        consola_cramer.delete("1.0", ctk.END)
+        consola_cramer.insert(ctk.END, f"Error: {str(e)}")
+
+
 # Función que usa la interfaz tkinter para generar la matriz y calcular el determinante
 def calcular_determinante_tab():
     try:
@@ -389,6 +485,38 @@ def iniciar_interfaz():
     notebook.add("Reportes")
     notebook.add("Excel View")
     notebook.add("Configuraciones")
+    tab_cramer = notebook.add("Regla de Cramer")
+
+    # Etiquetas para la matriz de coeficientes y el vector de resultados
+    label_coeficientes = ctk.CTkLabel(tab_cramer, text="Matriz de coeficientes (copiar desde Excel):")
+    label_coeficientes.pack(pady=10)
+
+    global matriz_input_cramer
+    matriz_input_cramer = ctk.CTkTextbox(tab_cramer, height=100)
+    matriz_input_cramer.pack(pady=10, padx=20)
+
+    label_resultados = ctk.CTkLabel(tab_cramer, text="Vector de resultados:")
+    label_resultados.pack(pady=10)
+
+    global vector_resultados_input
+    vector_resultados_input = ctk.CTkTextbox(tab_cramer, height=50)
+    vector_resultados_input.pack(pady=10, padx=20)
+
+    # Botón para resolver la matriz
+    btn_resolver_cramer = ctk.CTkButton(tab_cramer, text="Resolver con Cramer", command=resolver_por_cramer_interface)
+    btn_resolver_cramer.pack(pady=10)
+
+    # Consola para mostrar el resultado
+    global consola_cramer
+    consola_cramer = ctk.CTkTextbox(tab_cramer, height=100, font=("Courier", global_font_size))
+    consola_cramer.pack(pady=10, padx=20)
+
+    # Consola para mostrar los pasos
+    global consola_pasos_cramer
+    consola_pasos_cramer = ctk.CTkTextbox(tab_cramer, height=200, font=("Courier", global_font_size))
+    consola_pasos_cramer.pack(pady=10, padx=20)
+
+    
 
     # Pestaña "Resolutor Matriz"
     tab_resolutor = notebook.tab("Resolutor Matriz")
