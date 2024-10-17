@@ -127,6 +127,62 @@ def multiplyMatrix(matrixA:list , matrixB: list) -> list:
 
         for indexColumn in len(matrixB):
             num  = matrixA[index]
+            
+
+def determinante(matrix, level=0):
+    steps = ""
+    
+    # Función para formatear la matriz en formato monoespaciado
+    def format_matrix(matrix):
+        formatted_matrix = ""
+        for fila in matrix:
+            formatted_matrix += " ".join(f"{elem:8.2f}" for elem in fila) + "\n"
+        return formatted_matrix
+
+    # Verificar que la matriz sea cuadrada
+    if len(matrix) != len(matrix[0]):
+        raise ValueError("La matriz debe ser cuadrada.")
+    
+    # Caso base: si la matriz es 1x1, el determinante es el único elemento
+    if len(matrix) == 1:
+        steps += f"{'  ' * level}Determinante 1x1: {matrix[0][0]}\n"
+        steps += f"{'  ' * level}Matriz:\n{format_matrix(matrix)}"
+        return matrix[0][0], steps
+    
+    # Caso base: si la matriz es 2x2, calcular el determinante directamente
+    if len(matrix) == 2:
+        det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
+        steps += f"{'  ' * level}Matriz 2x2:\n{format_matrix(matrix)}"
+        steps += f"{'  ' * level}Determinante 2x2: {matrix[0][0]}*{matrix[1][1]} - {matrix[0][1]}*{matrix[1][0]} = {det}\n"
+        return det, steps
+    
+    # Expansión de cofactores para matrices mayores de 2x2
+    det = 0
+    for c in range(len(matrix)):
+        # Crear la submatriz eliminando la primera fila y la columna c
+        sub_matrix = [row[:c] + row[c+1:] for row in matrix[1:]]
+        cofactor_det, sub_steps = determinante(sub_matrix, level + 1)
+        term = ((-1) ** c) * matrix[0][c] * cofactor_det
+        det += term
+        steps += f"{'  ' * level}Matriz actual:\n{format_matrix(matrix)}"
+        steps += f"{'  ' * level}Cofactor {matrix[0][c]} * determinante de submatriz:\n{sub_steps}\n"
+        steps += f"{'  ' * level}Termino: {term}\n"
+
+    return det, steps
+
+
+def generar_matriz(n, entradas):
+    matriz = []
+    for i in range(n):
+        fila = []
+        for j in range(n):
+            valor = entradas[i][j].get()
+            try:
+                fila.append(float(valor))
+            except ValueError:
+                raise ValueError("Por favor, ingrese valores numéricos válidos.")
+        matriz.append(fila)
+    return matriz
 
         
 

@@ -12,16 +12,30 @@ def validar_matriz(matriz):
     
 
 # Función para validar la entrada de texto, verificando si puede ser convertida a una matriz válida
+from fractions import Fraction
+
+def convertir_fraccion_a_decimal(texto):
+    try:
+        if '/' in texto:
+            return float(Fraction(texto))  # Convierte la fracción a decimal
+        else:
+            return float(texto)  # Si no es fracción, lo convierte a float directamente
+    except ValueError:
+        return None  # Si no puede convertir, retorna None
+
 def validar_entrada_matriz(input_text):
     try:
         filas = input_text.strip().split("\n")
-        matriz = [list(map(float, fila.split())) for fila in filas]
+        matriz = [list(map(convertir_fraccion_a_decimal, fila.split())) for fila in filas]
+        if None in [elem for fila in matriz for elem in fila]:  # Verifica si alguna conversión falló
+            return None
         if validar_matriz(matriz):
             return matriz
         else:
             return None
     except ValueError:
         return None
+
 
 # Función para validar si dos o más matrices tienen las mismas dimensiones
 def validar_dimensiones_matrices(matrices):

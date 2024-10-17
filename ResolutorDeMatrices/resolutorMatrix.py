@@ -9,13 +9,34 @@ from pylatex.utils import NoEscape
 from datetime import datetime
 import sys
 
-# Lista para almacenar las matrices ingresadas en la pestaña de Suma Matrices
-matrices = []
+# Lista para almacenar las matricesSuma ingresadas en la pestaña de Suma Matrices
+matricesSuma = []
+matricesMult = []
 consola_visible = True
 consola_matrices_visible = True
+consola_pasos_determinante_visible = True
 matriz_suma_global = None  # Variable global para almacenar la matriz sumada
 global_font_size = 12
 
+# Función que usa la interfaz tkinter para generar la matriz y calcular el determinante
+def calcular_determinante_tab():
+    try:
+        # Obtener el texto de la matriz ingresada
+        matriz_str = matriz_input_determinante.get("1.0", ctk.END).strip()
+        matriz = validar_entrada_matriz(matriz_str)
+        
+        # Calcular determinante
+        det, pasos = determinante(matriz)
+        
+        # Mostrar resultado en la consola
+        consola_pasos_determinante.delete("1.0", ctk.END)
+        consola_determinante.insert(ctk.END, f"Determinante: {det}\n")
+        consola_pasos_determinante.insert(ctk.END, pasos)
+        
+    except ValueError as e:
+        consola_pasos_determinante.delete("1.0", ctk.END)
+        consola_determinante.insert(ctk.END, f"Error: {str(e)}")
+        
 def matriz_a_latex(matriz):
     filas = [" & ".join(map(str, fila)) for fila in matriz]
     return "\\begin{bmatrix} " + " \\\\ ".join(filas) + " \\end{bmatrix}"
@@ -122,22 +143,30 @@ def abrir_popup_ajustes():
 
 def toggle_consola():
     global consola_matrices_visible
+    global consola_pasos_determinante_visible
     
-    if consola_matrices_visible:
+    if consola_matrices_visible or consola_pasos_determinante_visible:
         consola_matrices_listadas.pack_forget()
-        btn_toggle_consola.configure(text="Mostrar Consolas")# Oculta el TextBox de matrices
+        consola_pasos_determinante.pack_forget()
+        btn_toggle_consola1.configure(text="Mostrar Consolas")# Oculta el TextBox de matricesSuma
+        btn_toggle_consola2.configure(text="Mostrar Consolas")
     else:
-        consola_matrices_listadas.pack(pady=10, padx=20, before=btn_toggle_consola) 
+        consola_matrices_listadas.pack(pady=10, padx=20, before=btn_toggle_consola1) 
+        consola_pasos_determinante.pack(pady=10, padx=20, before=btn_toggle_consola2)
         consola_matrices_listadas.pack_propagate(0)  # Desactiva la propagación del tamaño para evitar el ajuste del espacio
-        btn_toggle_consola.configure(text="Ocultar Consolas")# Muestra el TextBox de matrices
+        consola_pasos_determinante.pack_propagate(0)
+        btn_toggle_consola1.configure(text="Ocultar Consolas")# Muestra el TextBox de matricesSuma
+        btn_toggle_consola2.configure(text="Ocultar Consolas")
 
     consola_matrices_visible = not consola_matrices_visible
+    consola_pasos_determinante_visible= not consola_pasos_determinante_visible
+
 
 def agregar_matriz():
     input_text = matriz_input_suma.get("1.0", "end-1c")
     matriz = validar_entrada_matriz(input_text)
     if matriz is not None and input_text:
-        matrices.append(matriz)
+        matricesSuma.append(matriz)
         logger.log("Matriz agregada", matriz)
         matriz_input_suma.delete("1.0", "end")
     else:
@@ -145,15 +174,15 @@ def agregar_matriz():
         
 def mostrar_matrices_en_consola():
     consola_suma.delete("1.0", "end")  # Limpiar la consola principal
-    consola_matrices_listadas.delete("1.0", "end")  # Limpiar la consola para matrices listadas
+    consola_matrices_listadas.delete("1.0", "end")  # Limpiar la consola para matricesSuma listadas
 
-    if not matrices:
-        consola_matrices_listadas.insert("end", "No hay matrices almacenadas.\n")
+    if not matricesSuma:
+        consola_matrices_listadas.insert("end", "No hay matricesSuma almacenadas.\n")
         return
 
     consola_matrices_listadas.insert("end", "Matrices almacenadas:\n")
 
-    for idx, matriz in enumerate(matrices):
+    for idx, matriz in enumerate(matricesSuma):
         consola_matrices_listadas.insert("end", f"Matriz {idx + 1}:\n")
 
         for fila in matriz:
@@ -181,16 +210,16 @@ def obtener_y_resolver_matriz(matriz_input, consola_textbox):
     else:
         consola_textbox.insert("end", "Error: Asegúrate de que la matriz contiene solo números.\n")
         
-def validar_dimensiones_matrices(matrices):
-    if len(matrices) < 2:
+def validar_dimensiones_matrices(matricesSuma):
+    if len(matricesSuma) < 2:
         return False  
 
 
-    filas_primera_matriz = len(matrices[0])
-    columnas_primera_matriz = len(matrices[0][0])
+    filas_primera_matriz = len(matricesSuma[0])
+    columnas_primera_matriz = len(matricesSuma[0][0])
 
 
-    for matriz in matrices[1:]:
+    for matriz in matricesSuma[1:]:
         if len(matriz) != filas_primera_matriz or len(matriz[0]) != columnas_primera_matriz:
             return False  
 
@@ -199,21 +228,21 @@ def validar_dimensiones_matrices(matrices):
 def resolver_matrices():
     global matriz_suma_global 
     consola_suma.delete("1.0", "end")
-    if len(matrices) < 2:
-        consola_suma.insert("end", "Error: Debes agregar al menos dos matrices para sumarlas.\n")
+    if len(matricesSuma) < 2:
+        consola_suma.insert("end", "Error: Debes agregar al menos dos matricesSuma para sumarlas.\n")
         return
     
     try:
-        if validar_dimensiones_matrices(matrices):
-            matriz_suma_global = [[sum(filas) for filas in zip(*mat)] for mat in zip(*matrices)]
-            consola_suma.insert("end", "Resultado de la suma de matrices:\n")
+        if validar_dimensiones_matrices(matricesSuma):
+            matriz_suma_global = [[sum(filas) for filas in zip(*mat)] for mat in zip(*matricesSuma)]
+            consola_suma.insert("end", "Resultado de la suma de matricesSuma:\n")
             for fila in matriz_suma_global:
                 consola_suma.insert("end", f"{fila}\n")
-            logger.log("Suma de matrices resultante", matriz_suma_global)
+            logger.log("Suma de matricesSuma resultante", matriz_suma_global)
         else:
-            consola_suma.insert("end", "Error: Las dimensiones de las matrices no son compatibles.\n")
+            consola_suma.insert("end", "Error: Las dimensiones de las matricesSuma no son compatibles.\n")
     except Exception as e:
-        consola_suma.insert("end", f"Error al sumar matrices: {str(e)}\n")
+        consola_suma.insert("end", f"Error al sumar matricesSuma: {str(e)}\n")
 
 def copiar_matriz_suma_formato_excel():
     if matriz_suma_global is None:
@@ -356,6 +385,7 @@ def iniciar_interfaz():
     notebook.add("Vectores 1")
     notebook.add("Distributiva")
     notebook.add("Transpuesta")
+    notebook.add("Determinante")
     notebook.add("Reportes")
     notebook.add("Excel View")
     notebook.add("Configuraciones")
@@ -388,7 +418,7 @@ def iniciar_interfaz():
     label_suma = ctk.CTkLabel(tab_suma, text="Ingresa una matriz copiada desde Excel (formato de tabla):")
     label_suma.pack(pady=10)
 
-    # Entrada de texto para las matrices
+    # Entrada de texto para las matricesSuma
     global matriz_input_suma
     matriz_input_suma = ctk.CTkTextbox(tab_suma, height=100)
     matriz_input_suma.pack(pady=10, padx=20)
@@ -401,7 +431,7 @@ def iniciar_interfaz():
     btn_agregar = ctk.CTkButton(btn_frame, text="Agregar Matriz", command=agregar_matriz)
     btn_agregar.pack(side="left", padx=5)
 
-    # Botón para resolver la suma de matrices
+    # Botón para resolver la suma de matricesSuma
     btn_resolver_suma = ctk.CTkButton(btn_frame, text="Resolver", command=resolver_matrices)
     btn_resolver_suma.pack(side="left", padx=5)
     
@@ -419,12 +449,12 @@ def iniciar_interfaz():
     consola_matrices_listadas = ctk.CTkTextbox(tab_suma, height=200, width=500, font=("Courier", global_font_size))
     consola_matrices_listadas.pack(pady=10, padx=20)
     
-    global btn_toggle_consola
-    btn_toggle_consola = ctk.CTkButton(tab_suma, text="Ocultar Consolas", command=toggle_consola)
-    btn_toggle_consola.pack(pady=10)
+    global btn_toggle_consola1
+    btn_toggle_consola1 = ctk.CTkButton(tab_suma, text="Ocultar Consolas", command=toggle_consola)
+    btn_toggle_consola1.pack(pady=10)
     
 
-    # Crear un frame para la visualización de las matrices
+    # Crear un frame para la visualización de las matricesSuma
     global frame_matriz_visual
     frame_matriz_visual = ctk.CTkFrame(tab_suma)
     frame_matriz_visual.pack(expand=True, fill="both", padx=10, pady=10)
@@ -491,6 +521,34 @@ def iniciar_interfaz():
     # Botón para copiar la matriz en formato Excel
     btn_copiar = ctk.CTkButton(tab_Transpuesta, text="Copiar Formato Excel", command=copiar_matriz_formato_excel)
     btn_copiar.pack(pady=5)
+    
+    # Pestaña para cálculo de determinante
+    tab_determinante = notebook.tab("Determinante")
+    
+    label_determinante = ctk.CTkLabel(tab_determinante, text="Determinante de una matriz")
+    label_determinante.pack(pady=10)
+
+    # Cuadro de texto para ingresar la matriz
+    global matriz_input_determinante
+    matriz_input_determinante = ctk.CTkTextbox(tab_determinante, height=100)
+    matriz_input_determinante.pack(pady=10, padx=20)
+
+        # Botón para calcular el determinante
+    btn_calcular_det = ctk.CTkButton(tab_determinante, text="Calcular Determinante", command=calcular_determinante_tab)
+    btn_calcular_det.pack(pady=5)
+    
+    # Consola para mostrar el resultado del determinante
+    global consola_determinante
+    consola_determinante = ctk.CTkTextbox(tab_determinante, height=200, width=500, font=("Courier", global_font_size))
+    consola_determinante.pack(pady=10, padx=20)
+    
+    global consola_pasos_determinante
+    consola_pasos_determinante = ctk.CTkTextbox(tab_determinante, height=200, width=500, font=("Courier", global_font_size))
+    consola_pasos_determinante.pack(pady=10, padx=20)
+    global btn_toggle_consola2
+    btn_toggle_consola2 = ctk.CTkButton(tab_determinante, text="Ocultar Consolas", command=toggle_consola)
+    btn_toggle_consola2.pack(pady=10)
+
     
     #Pestaña "Excel View"
     tab_excel = notebook.tab("Excel View")
