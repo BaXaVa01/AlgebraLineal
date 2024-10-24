@@ -18,8 +18,10 @@ consola_visible = True
 consola_matrices_visible = True
 consola_pasos_determinante_visible = True
 consola_pasos_inversa_visible=True
+consola_matrices_visible_mult=True
 current_tab = None
 matriz_suma_global = None  # Variable global para almacenar la matriz sumada
+matriz_mult_global = None
 matriz_inversa_global= None
 global_font_size = 12
 # Inicializar las variables globales para la barra lateral
@@ -215,6 +217,8 @@ def redirigir_consola():
     
     if tab_actual == "Suma Matrices":
         sys.stdout = TextRedirector(consola_suma)
+    elif tab_actual == "Multiplicacion de Matrices":
+        sys.stdout = TextRedirector(consola_mult)
     elif tab_actual == "Inversa":
         sys.stdout = TextRedirector(consola_inversa_pasos)
     elif tab_actual == "Determinante":
@@ -287,7 +291,7 @@ def toggle_sidebar(icon_button):
         show_sidebar(icon_button)  # Si está oculto, lo mostramos
     
 def toggle_consola():
-    global consola_matrices_visible, consola_pasos_determinante_visible,consola_pasos_inversa_visible
+    global consola_matrices_visible, consola_pasos_determinante_visible,consola_pasos_inversa_visible,consola_matrices_visible_mult
     
     def configurar_consola(consola, toggle_btn, visible):
         if visible:
@@ -300,9 +304,11 @@ def toggle_consola():
     configurar_consola(consola_matrices_listadas, btn_toggle_consola1, consola_matrices_visible)
     configurar_consola(consola_pasos_determinante, btn_toggle_consola2, consola_pasos_determinante_visible)
     configurar_consola(consola_inversa_pasos,btn_toggle_consola3,consola_pasos_inversa_visible)
+    configurar_consola(consola_matrices_listadas_mult,btn_toggle_consola4,consola_matrices_visible_mult)
     consola_matrices_visible= not consola_matrices_visible
     consola_pasos_determinante_visible= not consola_pasos_determinante_visible
     consola_pasos_inversa_visible= not consola_pasos_inversa_visible
+    consola_matrices_visible_mult= not consola_matrices_visible_mult
 
 def limpiar_consolas(*consolas):
     for consola in consolas:
@@ -311,18 +317,18 @@ def limpiar_consolas(*consolas):
 def limpiar_contenido_consola(event, consola):
     consola.delete("1.0", "end")
 
-def mostrar_matrices_en_consola():
-    limpiar_consolas(consola_suma, consola_matrices_listadas)
+def mostrar_matrices_en_consola(consola1,consola,Matrices):
+    limpiar_consolas(consola1, consola)
     
-    if not matricesSuma:
-        consola_matrices_listadas.insert("end", "No hay matricesSuma almacenadas.\n")
+    if not Matrices:
+        consola.insert("end", "No hay matricesSuma almacenadas.\n")
         return
     
-    consola_matrices_listadas.insert("end", "Matrices almacenadas:\n")
-    for idx, matriz in enumerate(matricesSuma):
-        consola_matrices_listadas.insert("end", f"Matriz {idx + 1}:\n")
+    consola.insert("end", "Matrices almacenadas:\n")
+    for idx, matriz in enumerate(Matrices):
+        consola.insert("end", f"Matriz {idx + 1}:\n")
         for fila in matriz:
-            consola_matrices_listadas.insert("end"," ".join(f"{elem:8.2f}" for elem in fila)+"\n\n")
+            consola.insert("end"," ".join(f"{elem:8.2f}" for elem in fila)+"\n\n")
 
 # Función genérica para mostrar contenido en el sidebar con un botón de "Regresar"
 def mostrar_contenido_con_regreso(funcion_regreso, crear_contenido_funcion):
@@ -493,53 +499,83 @@ def agregar_boton(texto, comando):
     buttons.append(button)  
 
 
-def agregar_matriz():
-    input_text = matriz_input_suma.get("1.0", "end-1c")
+def agregar_matriz(consola, list):
+    input_text = consola.get("1.0", "end-1c")
     matriz = validar_entrada_matriz(input_text)
     if matriz is not None and input_text:
-        matricesSuma.append(matriz)
+        list.append(matriz)
         logger.log("Matriz agregada", matriz)
-        matriz_input_suma.delete("1.0", "end")
+        consola.delete("1.0", "end")
     else:
-        consola_suma.insert("end", "Error: Asegúrate de que la matriz contiene solo números.\n")
+        print("Asegúrate de que la matriz contiene solo números.\n")
+
         
 def mostrar_checkboxes_matrices():
-    # Limpiar cualquier widget anterior
-    for widget in checkboxes_frame.winfo_children():
-        widget.destroy()
-
-    # Diccionario para almacenar el estado de los checkboxes
-    checkboxes = {}
+    # Obtener el nombre de la pestaña seleccionada
+    tab_actual = notebook.get()
     
-    # Crear un checkbox para cada matriz en matricesSuma
-    for i, matriz in enumerate(matricesSuma):
-        var = ctk.IntVar(value=0)  # Variable para almacenar el estado del checkbox
-        checkbox = ctk.CTkCheckBox(checkboxes_frame, text=f"Matriz {i+1}", variable=var)
-        checkbox.pack(anchor="w", padx=10, pady=5)
-        checkboxes[i] = var  # Asociar el índice de la matriz con el checkbox
+    if tab_actual == "Suma Matrices":
+        # Limpiar cualquier widget anterior
+        for widget in checkboxes_frame.winfo_children():
+            widget.destroy()
 
-    # Crear el botón eliminar
-    btn_eliminar = ctk.CTkButton(checkboxes_frame, text="Eliminar Seleccionadas", command=lambda: eliminar_matrices_seleccionadas(checkboxes))
-    btn_eliminar.pack(pady=10)
+        # Diccionario para almacenar el estado de los checkboxes
+        checkboxes = {}
+        # Crear un checkbox para cada matriz en matricesSuma
+        for i, matriz in enumerate(matricesSuma):
+            var = ctk.IntVar(value=0)  # Variable para almacenar el estado del checkbox
+            checkbox = ctk.CTkCheckBox(checkboxes_frame, text=f"Matriz {i+1}", variable=var)
+            checkbox.pack(anchor="w", padx=10, pady=5)
+            checkboxes[i] = var  # Asociar el índice de la matriz con el checkbox
 
-    checkboxes_frame.pack(pady=10, padx=10)
+        # Crear el botón eliminar
+        btn_eliminar = ctk.CTkButton(checkboxes_frame, text="Eliminar Seleccionadas", command=lambda: eliminar_matrices_seleccionadas(consola_matrices_listadas,checkboxes,matricesSuma))
+        btn_eliminar.pack(pady=10)
 
-def eliminar_matrices_seleccionadas(checkboxes):
-    global matricesSuma
+        checkboxes_frame.pack(pady=10, padx=10)
+    elif tab_actual == "Multiplicacion de Matrices":
+        # Limpiar cualquier widget anterior
+        for widget in checkboxes_frame1.winfo_children():
+            widget.destroy()
 
+        # Diccionario para almacenar el estado de los checkboxes
+        checkboxes1 = {}
+        # Crear un checkbox para cada matriz en matricesSuma
+        for i, matriz in enumerate(matricesMult):
+            var = ctk.IntVar(value=0)  # Variable para almacenar el estado del checkbox
+            checkbox1 = ctk.CTkCheckBox(checkboxes_frame1, text=f"Matriz {i+1}", variable=var)
+            checkbox1.pack(anchor="w", padx=10, pady=5)
+            checkboxes1[i] = var  # Asociar el índice de la matriz con el checkbox
+
+        # Crear el botón eliminar
+        btn_eliminar1 = ctk.CTkButton(checkboxes_frame1, text="Eliminar Seleccionadas", command=lambda: eliminar_matrices_seleccionadas(consola_matrices_listadas_mult,checkboxes1,matricesMult))
+        btn_eliminar1.pack(pady=10)
+
+        checkboxes_frame1.pack(pady=10, padx=10)
+    
+
+def eliminar_matrices_seleccionadas(consola, checkboxes, Matrices):
     # Obtener los índices de las matrices seleccionadas
     indices_seleccionados = [i for i, var in checkboxes.items() if var.get() == 1]
 
-    # Eliminar las matrices seleccionadas
-    matricesSuma = [matriz for i, matriz in enumerate(matricesGlobal) if i not in indices_seleccionados]
+    # Eliminar las matrices seleccionadas de la lista original usando reverse para evitar desincronización
+    for i in sorted(indices_seleccionados, reverse=True):
+        del Matrices[i]
 
     # Limpiar la consola de lista de matrices y recargarla
-    consola_matrices_listadas.delete("1.0", "end")
-    mostrar_matrices_en_consola()
+    consola.delete("1.0", "end")
+    if notebook.get() == "Suma Matrices":
+        mostrar_matrices_en_consola(consola_suma, consola_matrices_listadas, matricesSuma)
+        # Limpiar los checkboxes después de eliminar
+        for widget in checkboxes_frame.winfo_children():
+            widget.destroy()
+    elif notebook.get() == "Multiplicacion de Matrices":
+        mostrar_matrices_en_consola(consola_mult, consola_matrices_listadas_mult, matricesMult)
+        # Limpiar los checkboxes después de eliminar
+        for widget in checkboxes_frame1.winfo_children():
+            widget.destroy()
 
-    # Limpiar los checkboxes después de eliminar
-    for widget in checkboxes_frame.winfo_children():
-        widget.destroy()
+
         
 
 def obtener_y_resolver_matriz(matriz_input, consola_textbox):
@@ -575,7 +611,35 @@ def validar_dimensiones_matrices(matricesSuma):
             return False  
 
     return True 
+def resolver_mult_matrices():
+    global matriz_mult_global
+    consola_mult.delete("1.0", "end")  # Limpiar consola antes de mostrar resultados
 
+    if len(matricesMult) < 2:
+        consola_mult.insert("end", "Error: Debes agregar al menos dos matrices para multiplicarlas.\n")
+        return
+
+    try:
+        # Inicializamos el resultado con la primera matriz
+        resultado = matricesMult[0]
+        
+        # Multiplicamos secuencialmente las matrices
+        for matriz in matricesMult[1:]:
+            resultado = multiplicar_matrices([resultado, matriz])
+        
+        # Si el resultado es válido, lo guardamos
+        if resultado:
+            matriz_mult_global = resultado  # Guardar el resultado en la variable global
+            consola_mult.insert("end", "Resultado de la multiplicación de matrices:\n")
+            imprimir_matriz_monoespaciada(consola_mult, resultado)
+        else:
+            consola_mult.insert("end", "Error: Las dimensiones de las matrices no son compatibles para la multiplicación.\n")
+    
+    except Exception as e:
+        consola_mult.insert("end", f"Error al multiplicar matrices: {str(e)}\n")
+    
+    except Exception as e:
+        consola_mult.insert("end", f"Error al multiplicar matrices: {str(e)}\n")
 def resolver_matrices():
     global matriz_suma_global 
     consola_suma.delete("1.0", "end")
@@ -599,6 +663,11 @@ def copiar_matriz_suma_formato_excel():
     copiar_matriz_en_formato_excel(matriz_suma_global, consola_suma, root, 
                                    mensaje_exito="Matriz sumada copiada en formato Excel.", 
                                    mensaje_error="Error: No hay matriz sumada para copiar.")
+
+def copiar_matriz_mult_formato_excel():
+    copiar_matriz_en_formato_excel(matriz_mult_global, consola_mult, root, 
+                                   mensaje_exito="Matriz producto copiada en formato Excel.", 
+                                   mensaje_error="Error: No hay matriz producto para copiar.")
 
 def conseguir_matriz(matriz, consola=None, root=None, mensaje_exito="Matriz Guardada a Matrices Globales.", mensaje_error="Error: No hay matriz para guardar."):
     if matriz is None or not matriz:
@@ -794,6 +863,7 @@ def iniciar_interfaz():
     # Crear pestañas
     notebook.add("Resolutor Matriz")
     notebook.add("Suma Matrices")
+    notebook.add("Multiplicacion de Matrices")
     notebook.add("Vectores 1")
     notebook.add("Distributiva")
     notebook.add("Transpuesta")
@@ -828,6 +898,9 @@ def iniciar_interfaz():
     sys.stdout = TextRedirector(consola_textbox)
 
     # Pestaña "Suma Matrices"
+    global consola_matrices_listadas
+    global btn_toggle_consola1
+    global consola_suma
     tab_suma = notebook.tab("Suma Matrices")
 
     # Etiqueta de instrucción
@@ -848,7 +921,7 @@ def iniciar_interfaz():
     menu_agregar_eliminar = ctk.CTkFrame(btn_frame)
     menu_agregar_eliminar.pack_forget()
 
-    btn_agregar = ctk.CTkButton(menu_agregar_eliminar, text="Agregar Matriz", command=agregar_matriz)
+    btn_agregar = ctk.CTkButton(menu_agregar_eliminar, text="Agregar Matriz", command=lambda:agregar_matriz(matriz_input_suma,matricesSuma))
     btn_agregar.configure(fg_color="green", text_color="black")
     btn_agregar.pack(pady=5)
 
@@ -872,7 +945,7 @@ def iniciar_interfaz():
     btn_resolver_suma = ctk.CTkButton(btn_frame, text="Resolver", command=resolver_matrices)
     btn_resolver_suma.pack(side="left", padx=5)
     #Boton para Mostrar lista de matrices
-    btn_mostrar_lista_matriz_suma = ctk.CTkButton(btn_frame,text="Mostrar Lista de Matrices",command=mostrar_matrices_en_consola)
+    btn_mostrar_lista_matriz_suma = ctk.CTkButton(btn_frame,text="Mostrar Lista de Matrices")
     btn_mostrar_lista_matriz_suma.pack(side="left",padx=5)
     # Botones principales que muestran el menú desplegable
     btn_agregar_eliminar = ctk.CTkButton(btn_frame, text="Agregar/Eliminar", command=lambda: mostrar_menu_agregar_eliminar(menu_agregar_eliminar, btn_frame, "Agregar/Eliminar"))
@@ -885,23 +958,104 @@ def iniciar_interfaz():
     
 
     # Consola para la salida de la operación Suma Matrices
-    global consola_suma
+    
     consola_suma = ctk.CTkTextbox(tab_suma, height=200, width=500, font=("Courier", global_font_size))
     consola_suma.pack(pady=10, padx=20)
-    
     # Botón para mostrar las matrices (toggle consola)
-    global btn_toggle_consola1
+    
     btn_toggle_consola1 = ctk.CTkButton(tab_suma, text="Ocultar Consolas", command=toggle_consola)
     btn_toggle_consola1.pack(pady=10)
 
     # Consola para la lista de matrices (mostrada u oculta con el botón toggle)
-    global consola_matrices_listadas
+    
     consola_matrices_listadas = ctk.CTkTextbox(tab_suma, height=200, width=500, font=("Courier", global_font_size))
     consola_matrices_listadas.pack(pady=10, padx=20)
+    btn_mostrar_lista_matriz_suma.configure(command=lambda:mostrar_matrices_en_consola(consola_suma,consola_matrices_listadas,matricesSuma))
 
     # Frame para los checkboxes
     global checkboxes_frame
     checkboxes_frame = ctk.CTkFrame(tab_suma)
+    
+    # Pestaña "Multiplicacion Matrices"
+    global consola_matrices_listadas_mult
+    global btn_toggle_consola4
+    global consola_mult
+    tab_mult = notebook.tab("Multiplicacion de Matrices")
+
+    # Etiqueta de instrucción
+    label_mult = ctk.CTkLabel(tab_mult, text="Ingresa una matriz copiada desde Excel (formato de tabla):")
+    label_mult.pack(pady=10)
+
+    # Entrada de texto para las matrices
+    global matriz_input_mult
+    matriz_input_mult = ctk.CTkTextbox(tab_mult, height=100)
+    matriz_input_mult.pack(pady=10, padx=20)
+    matriz_input_mult.bind("<KeyRelease>", lambda event: ajustar_tamano_texto(matriz_input_mult))  # Ajustar tamaño al escribir
+
+    # Frame para los botones de acción
+    btn_frame1 = ctk.CTkFrame(tab_mult)
+    btn_frame1.pack(pady=5)
+
+    # Crear menú desplegable para agregar/eliminar matrices
+    menu_agregar_eliminar1 = ctk.CTkFrame(btn_frame1)
+    menu_agregar_eliminar1.pack_forget()
+
+    
+    btn_agregar1 = ctk.CTkButton(menu_agregar_eliminar1, text="Agregar Matriz",command=lambda:agregar_matriz(matriz_input_mult,matricesMult))
+    btn_agregar1.configure(fg_color="green", text_color="black")
+    btn_agregar1.pack(pady=5)
+
+    btn_mostrar_checkboxes1 = ctk.CTkButton(menu_agregar_eliminar1, text="Seleccionar Matrices para Eliminar", command=mostrar_checkboxes_matrices)
+    btn_mostrar_checkboxes1.configure(fg_color="green", text_color="black")
+    btn_mostrar_checkboxes1.pack(pady=5)
+
+    # Crear menú desplegable para copiar formato Excel/guardar resultado
+    menu_copiar_guardar1 = ctk.CTkFrame(btn_frame1)
+    menu_copiar_guardar1.pack_forget()
+
+    btn_copiar_matriz_mult = ctk.CTkButton(menu_copiar_guardar1, text="Copiar Formato Excel", command=copiar_matriz_mult_formato_excel)
+    btn_copiar_matriz_mult.configure(fg_color="red", text_color="white")
+    btn_copiar_matriz_mult.pack(pady=5)
+
+    btn_matrices_global_mult = ctk.CTkButton(menu_copiar_guardar1, text="Guardar Resultado",command=lambda:agregar_a_matriz_global(matriz_mult_global,consola_mult))
+    btn_matrices_global_mult.configure(fg_color="red", text_color="white")
+    btn_matrices_global_mult.pack(pady=5)
+    
+    # Botón para resolver la suma de matrices
+    btn_resolver_mult = ctk.CTkButton(btn_frame1, text="Resolver", command=resolver_mult_matrices)
+    btn_resolver_mult.pack(side="left", padx=5)
+    #Boton para Mostrar lista de matrices
+    btn_mostrar_lista_matriz_mult = ctk.CTkButton(btn_frame1,text="Mostrar Lista de Matrices")
+    btn_mostrar_lista_matriz_mult.pack(side="left",padx=5)
+    # Botones principales que muestran el menú desplegable
+    btn_agregar_eliminar1 = ctk.CTkButton(btn_frame1, text="Agregar/Eliminar", command=lambda: mostrar_menu_agregar_eliminar(menu_agregar_eliminar1, btn_frame1, "Agregar/Eliminar"))
+    btn_agregar_eliminar1.configure(fg_color="green", text_color="black")
+    btn_agregar_eliminar1.pack(padx=5)
+
+    btn_copiar_guardar1 = ctk.CTkButton(btn_frame1, text="Copiar/Guardar", command=lambda: mostrar_menu_copiar_guardar(menu_copiar_guardar1, btn_frame1, "Copiar/Guardar"))
+    btn_copiar_guardar1.configure(fg_color="red", text_color="white")
+    btn_copiar_guardar1.pack(padx=5)
+    
+
+    # Consola para la salida de la operación Suma Matrices
+
+    consola_mult = ctk.CTkTextbox(tab_mult, height=200, width=500, font=("Courier", global_font_size))
+    consola_mult.pack(pady=10, padx=20)
+    
+    # Botón para mostrar las matrices (toggle consola)
+
+    btn_toggle_consola4 = ctk.CTkButton(tab_mult, text="Ocultar Consolas", command=toggle_consola)
+    btn_toggle_consola4.pack(pady=10)
+
+    # Consola para la lista de matrices (mostrada u oculta con el botón toggle)
+
+    consola_matrices_listadas_mult = ctk.CTkTextbox(tab_mult, height=200, width=500, font=("Courier", global_font_size))
+    consola_matrices_listadas_mult.pack(pady=10, padx=20)
+    btn_mostrar_lista_matriz_mult.configure(command=lambda:mostrar_matrices_en_consola(consola_mult,consola_matrices_listadas_mult,matricesMult))
+
+    # Frame para los checkboxes
+    global checkboxes_frame1
+    checkboxes_frame1 = ctk.CTkFrame(tab_mult)
 
 
     # Pestaña "Vectores 1"
@@ -1108,6 +1262,9 @@ def iniciar_interfaz():
     
     matriz_input_suma.bind("<Button-3>",lambda event: limpiar_contenido_consola(event,matriz_input_suma))
     hacer_consola_droppable(matriz_input_suma)
+    
+    matriz_input_mult.bind("<Button-3>",lambda event: limpiar_contenido_consola(event,matriz_input_mult))
+    hacer_consola_droppable(matriz_input_mult)    
     
     matriz_input_cramer.bind("<Button-3>",lambda event: limpiar_contenido_consola(event,matriz_input_cramer))
     hacer_consola_droppable(matriz_input_cramer)
