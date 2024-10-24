@@ -64,3 +64,27 @@ def validar_matriz_vectores(matriz, u, v):
 
     # Si pasa todas las validaciones
     return True
+
+def obtener_segunda_mitad(matrix):
+    # Obtenemos el número de columnas
+    num_columnas = len(matrix[0])
+    
+    # Calculamos el punto medio de las columnas
+    mitad = num_columnas // 2
+    
+    # Extraemos la segunda mitad de las columnas
+    matrix2 = [fila[mitad:] for fila in matrix]
+    return matrix2
+
+def Validar_matriz_cuadrada(matriz):
+    # Verificamos que la matriz no esté vacía
+    if len(matriz) == 0:
+        return False
+    
+    # Verificamos que el número de columnas en cada fila sea igual al número de filas
+    num_filas = len(matriz)
+    for fila in matriz:
+        if len(fila) != num_filas:
+            return False
+    
+    return True

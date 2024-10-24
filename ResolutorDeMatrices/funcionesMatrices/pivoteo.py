@@ -3,19 +3,20 @@ from funcionesMatrices.reemplazar import reemplazarFila, alternarFilas
 from funcionesMatrices.matrixFunctions import *
 from fractions import Fraction
 
-def pivoteoMax(matrix):
+def pivoteoMax(matrix,Inverse):
     '''Se recorre la matriz iniciando desde 0,0, row y column
     siempre son el mismo valor, a menos que hayan más columnas que filas
     en ese caso dejan de aumentar.
     '''
-    row:int = 0
-    for column in range(len(matrix[0])- 1):
+    if Inverse:
+        row:int = 0
+    for column in range((len(matrix[0]))):
         
-        if row > len(matrix) - 1:
-            row = len(matrix) - 1
+        if row > (len(matrix[0])):
+            row = (len(matrix[0]))
         
         #Se busca que cuando el numero de columnas sea mayor que el de filas, se detenga
-        if column > len(matrix) - 1:
+        if column > (len(matrix[0])):
             break
 
         column=column + liberar_columna_pivote(matrix, row, column)
@@ -52,7 +53,53 @@ def pivoteoMax(matrix):
             printMatrix(matrix)
             
 
-        row += 1
+    
+    else:
+        row:int = 0
+        for column in range(len(matrix[0])- 1):
+            
+            if row > len(matrix) - 1:
+                row = len(matrix) - 1
+            
+            #Se busca que cuando el numero de columnas sea mayor que el de filas, se detenga
+            if column > len(matrix) - 1:
+                break
+
+            column=column + liberar_columna_pivote(matrix, row, column)
+            
+            for fila in range(row + 1, len(matrix)):
+                
+                if matrix[fila][column] == 0: continue
+                
+                operation = False
+                operacionString = "-"
+                if matrix[fila][column] < 0: operation = True
+
+                if operation: operacionString = " + "
+                print(f"F{fila + 1}=> F{fila + 1}{operacionString}{abs(matrix[fila][column])}*F{row + 1} \n") 
+
+                matrix[fila] = OperateRows(matrix[fila], multiplyRow(matrix[row][:],abs(matrix[fila][column])), operation)
+
+                
+                
+                printMatrix(matrix)
+            
+            for filaArriba in range(row, 0, -1):
+                # if row == 0: break
+                
+                operation = False
+                operacionString = "-"
+                if matrix[filaArriba - 1][column] < 0: 
+                    operacionString="+"
+                    operation = True
+                
+                print(f"F{filaArriba - 1}=> F{filaArriba - 1}{operacionString}{abs(matrix[filaArriba][column])}*F{row + 1} \n")
+                matrix[filaArriba -1] = OperateRows(matrix[filaArriba -1],multiplyRow(matrix[row][:], abs(matrix[filaArriba -1][column])), operation)
+                
+                printMatrix(matrix)
+                
+
+            row += 1
 
         
         

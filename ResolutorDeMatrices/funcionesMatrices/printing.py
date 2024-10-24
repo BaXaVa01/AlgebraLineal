@@ -1,5 +1,6 @@
 from tabulate import tabulate
 from fractions import Fraction
+from funcionesMatrices.matrixValidator import obtener_segunda_mitad
 # def printMatrix(matrix:list):
 #     """
 #     Esta funcion acepta solamente matrices como parametro
@@ -19,7 +20,7 @@ def printMatrix(matrix: list):
     """
     matrix2 = matrix
     matrix2 = [[Fraction(element) for element in row] for row in matrix]
-
+        
     print(tabulate(matrix2, tablefmt="github"))
     
     print("\n")   

@@ -1,3 +1,4 @@
+from funcionesMatrices.printing import printMatrix
 def multiplyRow(row:list, multiply):
     
     """Esta funcion lo que hace es muiltiplicar una fila: {row}
@@ -184,6 +185,39 @@ def generar_matriz(n, entradas):
         matriz.append(fila)
     return matriz
 
+
+def cramer(matriz, vector):
+    n = len(matriz)
+    det_matriz, pasos = determinante(matriz)  # Reutilizamos la función de determinante
+    if det_matriz == 0:
+        raise ValueError("El sistema no tiene solución por el método de cramer (determinante 0).")
+    
+    soluciones = []
+    for i in range(n):
+        # Crear una copia de la matriz original y reemplazar la columna i por el vector
+        matriz_modificada = [fila[:] for fila in matriz]
+        for j in range(n):
+            matriz_modificada[j][i] = vector[j]
+        
+        # Calcular el determinante de la matriz modificada
+        det_modificada, pasos_mod = determinante(matriz_modificada)
+        soluciones.append(det_modificada / det_matriz)
+        pasos += f"Determinante de la matriz con la columna {i+1} reemplazada:\n{pasos_mod}\n"
+        pasos += f"Solución {i+1}: {det_modificada} / {det_matriz} = {soluciones[-1]}\n"
+    
+    return soluciones, pasos
+
+def matriz_aumentada_con_identidad(matriz):
+    n = len(matriz)
+    
+    identidad = [[float(i == j) for i in range(n)] for j in range(n)]
+    
+    matriz_aumentada = [fila + identidad[i] for i, fila in enumerate(matriz)]
+    
+    print("Matriz aumentada con identidad:")
+    printMatrix(matriz_aumentada)
+    
+    return matriz_aumentada
         
 
             
