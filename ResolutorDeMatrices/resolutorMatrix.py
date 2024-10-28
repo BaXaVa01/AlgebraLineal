@@ -7,6 +7,9 @@ from funcionesMatrices.reemplazar import rotar_matriz_90
 from pylatex import Document, Section, Math, Matrix
 from pylatex.utils import NoEscape
 from datetime import datetime
+from PIL import ImageGrab
+import re
+from pix2tex.cli import LatexOCR
 import sys
 from io import StringIO
 
@@ -29,6 +32,7 @@ sidebar_width = 50
 sidebar_expanded_width = 200  
 sidebar_visible = False  
 buttons = []  
+model = LatexOCR()
 
     
 def imprimir_matriz_monoespaciada(consola, matriz):
@@ -50,6 +54,7 @@ def imprimir_matriz_monoespaciada(consola, matriz):
     consola.configure(font=("Courier", global_font_size)) 
 
 def resolver_Inversa():
+    global matriz_inversa_global
     limpiar_consolas(consola_inversa, consola_inversa_pasos)
     matriz_str = matriz_input_inversa.get("1.0", ctk.END).strip()
     try:
@@ -62,9 +67,11 @@ def resolver_Inversa():
 
                 consola_inversa.insert(ctk.END, "Inversa:\n")
                 imprimir_matriz_monoespaciada(consola_inversa, obtener_segunda_mitad(matriz))
+                matriz_inversa_global=obtener_segunda_mitad(matriz)
             else:
                 consola_inversa.insert(ctk.END, "No existe Inversa de una matriz con un determinante igual a 0\n------ErrorType: det=0")
-
+        else: 
+            consola_inversa.insert(ctk.END, "No se puede calcular la inversa para una matriz no cuadrada\n------ErrorType:rows != columns")
     except ValueError as e:
         consola_inversa.insert("end", f"Error: {str(e)}\n")
     
@@ -240,7 +247,7 @@ def ajustar_tamano_fuente(valor):
     global_font_size = int(valor)
 
     # Actualizar el tamaño de fuente de los widgets que tengan texto
-    widgets = [consola_textbox,consola_suma,consola_matrices_listadas, consola_distributiva, consola_transpuesta,consola_pasos_determinante]
+    widgets = [consola_textbox,consola_suma,consola_matrices_listadas, consola_distributiva, consola_transpuesta,consola_pasos_determinante,consola_determinante,consola_inversa,consola_cramer,consola_cramer_pasos,consola_matrices_listadas_mult]
     for widget in widgets:
         widget.configure(font=("Courier", global_font_size))
 def ajustar_tamano_texto(consola,event=None):
@@ -329,6 +336,11 @@ def mostrar_matrices_en_consola(consola1,consola,Matrices):
         consola.insert("end", f"Matriz {idx + 1}:\n")
         for fila in matriz:
             consola.insert("end"," ".join(f"{elem:8.2f}" for elem in fila)+"\n\n")
+def mostrar_matrices_en_consola_Ocr(matrices):
+    consola_matrices.delete("1.0", "end")  # Limpiar la consola antes de mostrar las nuevas matrices
+    for idx, matriz in enumerate(matrices):
+        consola_matrices.insert("end", f"{idx + 1}: {matriz}\n")
+    consola_matrices.insert("end", "\nHaz clic en una matriz para agregarla a matricesGlobales.")
 
 # Función genérica para mostrar contenido en el sidebar con un botón de "Regresar"
 def mostrar_contenido_con_regreso(funcion_regreso, crear_contenido_funcion):
@@ -576,7 +588,71 @@ def eliminar_matrices_seleccionadas(consola, checkboxes, Matrices):
             widget.destroy()
 
 
+def generate_entries():
+    try:
+        num_vectors = int(num_vectors_entry.get())
+        dim = int(dim_entry.get())
+        if dim <= 0 or dim > 10:
+            raise ValueError("La dimensión debe estar entre 1 y 10.")
+        if num_vectors <= 0 or num_vectors > 10:
+            raise ValueError("El número de vectores debe estar entre 1 y 10.")
         
+        # Limpiar las entradas anteriores
+        for widget in vectors_frame.winfo_children():
+            widget.destroy()
+
+        global vector_entries, scalar_entries
+        vector_entries = []
+        scalar_entries = []
+
+        # Generar entradas para cada vector y escalar
+        for i in range(num_vectors):
+            ctk.CTkLabel(vectors_frame, text=f"Escalar para el vector {i+1}:", font=("Arial", 12, "bold")).grid(row=i*2, column=0, sticky="w")
+            scalar_entry = ctk.CTkEntry(vectors_frame, width=100)
+            scalar_entry.grid(row=i*2, column=1, pady=5)
+            scalar_entries.append(scalar_entry)
+
+            ctk.CTkLabel(vectors_frame, text=f"Componentes del vector {i+1}:", font=("Arial", 12, "bold")).grid(row=i*2+1, column=0, sticky="w")
+            entries = []
+            for j in range(dim):
+                entry = ctk.CTkEntry(vectors_frame, width=50)
+                entry.grid(row=i*2+1, column=j+1, padx=1, pady=5)
+                entries.append(entry)
+            vector_entries.append(entries)
+
+    except ValueError as e:
+        consola_vectores.insert("end", f"Error: {str(e)}\n")
+
+# Función para calcular la combinación lineal de los vectores ingresados
+def calculate():
+    try:
+        num_vectors = int(num_vectors_entry.get())
+        dim = int(dim_entry.get())
+
+        # Obtener los vectores y sus escalares
+        vectors = []
+        for i in range(num_vectors):
+            components = [float(vector_entries[i][j].get()) for j in range(dim)]
+            vectors.append(components)
+
+        scalars = [float(scalar_entries[i].get()) for i in range(num_vectors)]
+
+        # Realizar la combinación lineal de los vectores
+        result_vector = [0.0] * dim
+        result_details = []
+
+        for i in range(num_vectors):
+            scaled_vector = [scalars[i] * comp for comp in vectors[i]]
+            result_details.append(f"{scalars[i]} * {vectors[i]} = {scaled_vector}")
+            result_vector = [sum(x) for x in zip(result_vector, scaled_vector)]
+
+        # Mostrar el resultado en la consola
+        consola_vectores.delete("1.0", "end")
+        consola_vectores.insert("end", "\n".join(result_details) + f"\n\nResultado final: {result_vector}\n")
+        consola_vectores.see("end")
+
+    except ValueError:
+        consola_vectores.insert("end", "Error: Por favor, ingrese valores válidos.\n")
 
 def obtener_y_resolver_matriz(matriz_input, consola_textbox):
     consola_textbox.delete("1.0", "end")  # Limpiar el contenido anterior en la consola
@@ -585,15 +661,15 @@ def obtener_y_resolver_matriz(matriz_input, consola_textbox):
     
     if matriz is not None:
         print("Matriz inicial:")
-        printMatrix(matriz,False)
+        printMatrix(matriz)
 
         pivoteoMax(matriz,False)
 
         print("Matriz después del pivoteo:")
-        printMatrix(matriz,False)
+        printMatrix(matriz)
 
         print("Resultados finales:")
-        printResult(matriz,False)
+        printResult(matriz)
     else:
         consola_textbox.insert("end", "Error: Asegúrate de que la matriz contiene solo números.\n")
         
@@ -826,6 +902,128 @@ def limpiar_menus(event, menu1, menu2):
     if not event.widget in (menu1, menu2):
         menu1.pack_forget()
         menu2.pack_forget()
+        
+# Crear un menú desplegable para seleccionar la vista
+def cambiar_vista_formateado(opcion):
+    if opcion == "Excel":
+        frame_excel.pack(expand=True, fill="both", padx=10, pady=10)
+        frame_ocr.pack_forget()
+    elif opcion == "OCR":
+        frame_ocr.pack(expand=True, fill="both", padx=10, pady=10)
+        frame_excel.pack_forget()
+
+def pegar_imagen_ocr():
+    try:
+        # Intentar obtener la imagen del portapapeles
+        img = ImageGrab.grabclipboard()
+        if img:
+            # Procesar la imagen con el modelo OCR
+            limpiar_consolas(consola_matrices, entrada_ocr)
+            resultado_ocr = model(img).strip()
+            # Detectar matrices y convertirlas a listas de listas
+            matrices_detectadas = detectar_y_convertir_matrices(resultado_ocr)
+
+            if matrices_detectadas:
+                sys.stdout = TextRedirector(consola_matrices)
+                consola_matrices.insert("end", "Matrices detectadas:\n")
+                for idx, matriz in enumerate(matrices_detectadas):
+                    consola_matrices.insert("end", f"Matriz {idx + 1}:\n")
+                    printMatrix(matriz)  # Imprime la matriz en el formato adecuado
+                    consola_matrices.insert("end", "\n")
+                    matricesGlobal.append(matriz)  # Guarda la matriz en matricesGlobales
+            else:
+                entrada_ocr.insert("end", "No se detectaron matrices válidas en la imagen OCR.\n")
+        else:
+            entrada_ocr.insert("end", "No hay una imagen válida en el portapapeles.\n")
+    except Exception as e:
+        entrada_ocr.insert("end", f"Error al pegar la imagen: {str(e)}\n")
+
+        
+
+
+def convertir_latex_a_matriz(latex_str):
+    """
+    Convierte una representación LaTeX de una matriz en una lista de listas de Python,
+    considerando el formato específico que sigue el OCR.
+    
+    :param latex_str: Cadena que contiene la matriz en formato LaTeX.
+    :return: Lista de listas que representa la matriz.
+    :raises ValueError: Si no se puede extraer una matriz válida.
+    """
+    # Limpiar elementos innecesarios y enfocarse en el patrón con corchetes y la "Y".
+    latex_str = latex_str.replace("\\left", "").replace("\\right", "")
+    latex_str = latex_str.replace("[", "").replace("]", "")
+    
+    # Buscar el contenido entre \begin{array} y \end{array}
+    patron_matriz = r"\\begin{array}.*?\{.*?\}(.*?)\\end{array}"
+    coincidencia = re.search(patron_matriz, latex_str, re.DOTALL)
+    
+    if coincidencia:
+        contenido_matriz = coincidencia.group(1).strip()
+
+        # Separar las filas por "//" o "\\"
+        filas = re.split(r"\\\\|//", contenido_matriz)
+        matriz = []
+
+        for fila in filas:
+            # Buscar todos los números entre corchetes {} y posibles 'Y's entre ellos
+            elementos = re.findall(r"\{(-?\d+(\.\d+)?)\}", fila)
+            try:
+                # Convertir cada número encontrado a flotante y agregarlo a la fila
+                fila_numeros = [float(elem[0]) for elem in elementos]
+                matriz.append(fila_numeros)
+            except ValueError:
+                raise ValueError("La matriz contiene elementos no numéricos o el formato es incorrecto.")
+        
+        return matriz
+
+    # Si no se encuentra una matriz en el formato esperado, lanzar un error
+    raise ValueError("No se pudo encontrar una matriz en el formato LaTeX proporcionado.")
+
+def is_number(s):
+    """
+    Verifica si una cadena puede convertirse en un número flotante.
+    
+    :param s: Cadena a verificar.
+    :return: True si es un número, False si no lo es.
+    """
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+def detectar_y_convertir_matrices(ocr_resultado):
+    # Paso 1: Convertir fracciones a decimales antes de detectar matrices
+    ocr_resultado = convertir_fraccion_a_decimal_Latex(ocr_resultado)
+    print(f"Cadena después de convertir fracciones a decimales: {ocr_resultado}")  # DEBUG
+
+    # Paso 2: Limpiar caracteres no deseados como \left, \right, y los dobles corchetes
+    ocr_resultado = ocr_resultado.replace("\\left", "").replace("\\right", "")
+    ocr_resultado = ocr_resultado.replace("{{", "").replace("}}", "")
+
+    # Paso 3: Definir patrón para detectar matrices en formato LaTeX
+    patron_matriz = r"\\begin{array}.*?\{.*?\}(.*?)\\end{array}"
+    matrices_encontradas = re.findall(patron_matriz, ocr_resultado, re.DOTALL)
+
+    matrices_convertidas = []
+    for matriz_latex in matrices_encontradas:
+        try:
+            # Separar las filas por doble barra o saltos de línea en LaTeX
+            filas = re.split(r"\\\\|\n", matriz_latex)
+            matriz = []
+
+            for fila in filas:
+                # Dividir cada fila por el símbolo de separación "&" y convertir a números
+                elementos = fila.split("&")
+                fila_numeros = [float(elem.strip()) for elem in elementos]
+                matriz.append(fila_numeros)
+            
+            matrices_convertidas.append(matriz)
+        except ValueError as e:
+            print(f"Error al convertir una matriz: {str(e)}")
+
+    return matrices_convertidas
 
 # Función para inicializar la interfaz
 def iniciar_interfaz():
@@ -871,7 +1069,7 @@ def iniciar_interfaz():
     notebook.add("Inversa")
     notebook.add("Cramer")
     notebook.add("Reportes")
-    notebook.add("Excel View")
+    notebook.add("Formateado")
 
     # Pestaña "Resolutor Matriz"
     tab_resolutor = notebook.tab("Resolutor Matriz")
@@ -893,9 +1091,6 @@ def iniciar_interfaz():
     btn_resolver = ctk.CTkButton(tab_resolutor, text="Resolver Matriz", 
                                  command=lambda: obtener_y_resolver_matriz(matriz_input, consola_textbox))
     btn_resolver.pack(pady=10)
-
-    # Redirigir la salida estándar (stdout) a la "consola" de la interfaz
-    sys.stdout = TextRedirector(consola_textbox)
 
     # Pestaña "Suma Matrices"
     global consola_matrices_listadas
@@ -1037,7 +1232,7 @@ def iniciar_interfaz():
     btn_copiar_guardar1.pack(padx=5)
     
 
-    # Consola para la salida de la operación Suma Matrices
+    # Consola para la salida de la operación Mult Matrices
 
     consola_mult = ctk.CTkTextbox(tab_mult, height=200, width=500, font=("Courier", global_font_size))
     consola_mult.pack(pady=10, padx=20)
@@ -1060,8 +1255,42 @@ def iniciar_interfaz():
 
     # Pestaña "Vectores 1"
     tab_vectores1 = notebook.tab("Vectores 1")
-    label_vectores1 = ctk.CTkLabel(tab_vectores1, text="Operaciones con Vectores 1 (pendiente)")
+    global scrollable_frame_Vector1
+    scrollable_frame_Vector1 = ctk.CTkScrollableFrame(tab_vectores1)
+    scrollable_frame_Vector1.pack(fill="both", expand=True)
+    # Etiqueta de instrucción
+    label_vectores1 = ctk.CTkLabel(scrollable_frame_Vector1, text="Número de vectores:")
     label_vectores1.pack(pady=10)
+
+    # Entrada para el número de vectores
+    global num_vectors_entry, dim_entry, vector_entries, scalar_entries
+    num_vectors_entry = ctk.CTkEntry(scrollable_frame_Vector1, width=100)
+    num_vectors_entry.pack(pady=5)
+
+    # Entrada para la dimensión de los vectores
+    label_dim = ctk.CTkLabel(scrollable_frame_Vector1, text="Dimensión de los vectores:")
+    label_dim.pack(pady=5)
+    dim_entry = ctk.CTkEntry(scrollable_frame_Vector1, width=100)
+    dim_entry.pack(pady=5)
+
+    # Botón para generar los inputs de los vectores y escalares
+    btn_generar_vectores = ctk.CTkButton(scrollable_frame_Vector1, text="Generar Vectores", command=generate_entries)
+    btn_generar_vectores.pack(pady=10)
+
+    # Frame para los vectores generados
+    global vectors_frame
+    vectors_frame = ctk.CTkFrame(scrollable_frame_Vector1)
+    vectors_frame.pack(pady=10)
+
+    # Consola para mostrar los resultados
+    global consola_vectores
+    consola_vectores = ctk.CTkTextbox(scrollable_frame_Vector1, height=300, width=500, font=("Courier", global_font_size))
+    consola_vectores.pack(pady=10, padx=20)
+
+    # Botón para calcular el resultado de la combinación lineal
+    btn_calcular_vectores = ctk.CTkButton(scrollable_frame_Vector1, text="Calcular", command=calculate)
+    btn_calcular_vectores.pack(pady=10)
+
 
     # Pestaña "Distributiva"
     tab_distributiva = notebook.tab("Distributiva")
@@ -1172,6 +1401,8 @@ def iniciar_interfaz():
     #Boton para Resolver usando Gauss Jordan
     btn_inversa= ctk.CTkButton(scrollable_frame_inversa, text="Resolver con Gauss", command=resolver_Inversa)
     btn_inversa.pack(pady=5)
+    btn_agregar_matriz_globalI=ctk.CTkButton(scrollable_frame_inversa,text="Guardar Matriz",command=lambda:agregar_a_matriz_global(matriz_inversa_global,consola_inversa))
+    btn_agregar_matriz_globalI.pack(pady=5)
     #Consola Inversa Pasos y Resultado
     global consola_inversa_pasos, consola_inversa
     consola_inversa = ctk.CTkTextbox(scrollable_frame_inversa, height=300, width=500, font=("Courier", global_font_size))
@@ -1215,46 +1446,79 @@ def iniciar_interfaz():
     consola_cramer = ctk.CTkTextbox(scrollable_frame_cramer, height=300, width=500, font=("Courier", global_font_size))
     consola_cramer.pack(pady=10, padx=20)
 
-    
-
+    tab_reportes = notebook.tab("Reportes")
+    label_reportes = ctk.CTkLabel(tab_reportes, text="Generador de reportes LATEX")
+    label_reportes.pack(pady=10)
+    btn_generar_reporte = ctk.CTkButton(tab_reportes, text="Generar Reporte de Operaciones", command=generar_reporte)
+    btn_generar_reporte.pack(pady=10)
     
     #Pestaña "Excel View"
-    tab_excel = notebook.tab("Excel View")
+    tab_formateado = notebook.tab("Formateado")
+        # Menú de selección de vista
+    opciones_vista = ["Excel", "OCR"]
+    select_vista = ctk.CTkOptionMenu(tab_formateado, values=opciones_vista, command=cambiar_vista_formateado)
+    select_vista.pack(anchor="ne", pady=10, padx=10)
+    select_vista.set("Excel")  # Vista predeterminada
+        # Frame para la vista de Excel
+    global frame_excel
+    frame_excel = ctk.CTkFrame(tab_formateado)
+    frame_excel.pack(expand=True, fill="both", padx=10, pady=10)
         # Label para mostrar errores
     global label_error
     global frame_hoja
     label_error = ctk.CTkLabel(root, text="", text_color="red")
-    label_error.pack(pady=5,in_=tab_excel)
+    label_error.pack(pady=5,in_=frame_excel)
     frame_hoja = ctk.CTkFrame(root)
-    frame_hoja.pack(expand=True, fill="both", padx=10, pady=10,in_=tab_excel)
+    frame_hoja.pack(expand=True, fill="both", padx=10, pady=10,in_=frame_excel)
         # Crear entradas para filas y columnas
-    label_filas = ctk.CTkLabel(tab_excel, text="Número de Filas:")
+    label_filas = ctk.CTkLabel(frame_excel, text="Número de Filas:")
     label_filas.pack(pady=5)
 
     global entry_filas
     global entry_columnas
-    entry_filas = ctk.CTkEntry(tab_excel, width=50)
+    entry_filas = ctk.CTkEntry(frame_excel, width=50)
     entry_filas.pack(pady=5)
     entry_filas.bind("<KeyRelease>", limpiar_error)
 
-    label_columnas = ctk.CTkLabel(tab_excel, text="Número de Columnas:")
+    label_columnas = ctk.CTkLabel(frame_excel, text="Número de Columnas:")
     label_columnas.pack(pady=5)
 
-    entry_columnas = ctk.CTkEntry(tab_excel, width=50)
+    entry_columnas = ctk.CTkEntry(frame_excel, width=50)
     entry_columnas.pack(pady=5)
     entry_columnas.bind("<KeyRelease>", limpiar_error)  # Limpiar error al escribir
 
     # Botón para generar la hoja de cálculo
-    btn_generar = ctk.CTkButton(tab_excel,text="Generar Hoja", command=generar_hoja)
+    btn_generar = ctk.CTkButton(frame_excel,text="Generar Hoja", command=generar_hoja)
     btn_generar.pack(pady=10)
     # Botón para copiar la hoja en formato Excel
-    btn_copiar_hoja = ctk.CTkButton(tab_excel, text="Copiar Hoja Formato Excel", command=copiar_hoja_formato_excel)
+    btn_copiar_hoja = ctk.CTkButton(frame_excel, text="Copiar Hoja Formato Excel", command=copiar_hoja_formato_excel)
     btn_copiar_hoja.pack(pady=10)
-    btn_agregar_matriz_global=ctk.CTkButton(tab_excel, text="Guardar Matriz",command=lambda:agregar_a_matriz_global(conseguir_matriz(celdas_generadas,None,root,mensaje_exito="Guardado con exito",mensaje_error="No se ha podido guardar la matriz"),None))
+    btn_agregar_matriz_global=ctk.CTkButton(frame_excel, text="Guardar Matriz",command=lambda:agregar_a_matriz_global(conseguir_matriz(celdas_generadas,None,root,mensaje_exito="Guardado con exito",mensaje_error="No se ha podido guardar la matriz"),None))
     btn_agregar_matriz_global.pack(pady=10)
-    btn_seleccionar_consolas = ctk.CTkButton(tab_excel, text="Seleccionar Consolas",
+    btn_seleccionar_consolas = ctk.CTkButton(frame_excel, text="Seleccionar Consolas",
                                          command=crear_seleccionador_consolas)
     btn_seleccionar_consolas.pack(pady=10)
+    
+        # Frame para la vista de OCR (inicialmente oculto)
+    global frame_ocr
+    frame_ocr = ctk.CTkFrame(tab_formateado)
+    # Consola para pegar la imagen desde el portapapeles
+    global entrada_ocr
+    entrada_ocr = ctk.CTkTextbox(frame_ocr, height=100)
+    entrada_ocr.pack(pady=10, padx=20)
+    entrada_ocr.insert("1.0", "Presiona Ctrl+V aquí para pegar la captura")
+    # Detectar Ctrl+V
+    entrada_ocr.bind("<Control-v>", lambda event: pegar_imagen_ocr())
+    
+    # Consola para mostrar las matrices detectadas
+    global consola_matrices
+    consola_matrices = ctk.CTkTextbox(frame_ocr, height=200, width=500)
+    consola_matrices.pack(pady=10, padx=20)
+
+    # Lista para almacenar las matrices detectadas que se mostrarán en la consola
+    global matrices_detectadas 
+    
+
 
     # Modificar las consolas para que acepten el "drop"
     matriz_input.bind("<Button-3>",lambda event: limpiar_contenido_consola(event,matriz_input))
@@ -1284,6 +1548,7 @@ def iniciar_interfaz():
 
     matriz_input_transpuesta.bind("<Button-3>",lambda event: limpiar_contenido_consola(event,matriz_input_transpuesta))
     hacer_consola_droppable(matriz_input_transpuesta)
+    
     # Llamar a la función de verificación periódica después de iniciar la interfaz
     verificar_cambio_pestana()
 
