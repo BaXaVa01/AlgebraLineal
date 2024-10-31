@@ -230,7 +230,7 @@ def multiplicar_matrices(matrices):
         if len(resultado[0]) != len(matriz):
             raise ValueError("Las dimensiones de las matrices no son compatibles para multiplicar.")
         
-        resultado = [[sum(a * b for a, b in zip(filaA, columnaB)) for columnaB in zip(*matriz)] for filaA in resultado]
+        resultado = [[sum(round(a * b,3) for a, b in zip(filaA, columnaB)) for columnaB in zip(*matriz)] for filaA in resultado]
 
     return resultado
             

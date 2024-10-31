@@ -45,7 +45,7 @@ def imprimir_matriz_monoespaciada(consola, matriz):
     
     matriz_str = ""
     for fila in matriz:
-        fila_str = " ".join(f"{elem:8.2f}" for elem in fila)  
+        fila_str = " ".join(f"{elem:8.4f}" for elem in fila)  
         matriz_str += fila_str + "\n"  
 
 
@@ -335,7 +335,7 @@ def mostrar_matrices_en_consola(consola1,consola,Matrices):
     for idx, matriz in enumerate(Matrices):
         consola.insert("end", f"Matriz {idx + 1}:\n")
         for fila in matriz:
-            consola.insert("end"," ".join(f"{elem:8.2f}" for elem in fila)+"\n\n")
+            consola.insert("end"," ".join(f"{elem:8.4f}" for elem in fila)+"\n\n")
 def mostrar_matrices_en_consola_Ocr(matrices):
     consola_matrices.delete("1.0", "end")  # Limpiar la consola antes de mostrar las nuevas matrices
     for idx, matriz in enumerate(matrices):
@@ -415,7 +415,7 @@ def mostrar_matrices_almacenadas():
     # Mostrar cada matriz en formato monoespaciado y hacerlo arrastrable
     for i, matriz in enumerate(matricesGlobal):
         # Convertir la matriz a texto monoespaciado
-        matriz_str = "\n".join([" ".join(f"{elem:8.2f}" for elem in fila) for fila in matriz])
+        matriz_str = "\n".join([" ".join(f"{elem:8.4f}" for elem in fila) for fila in matriz])
         
         # Crear una etiqueta que sea "arrastrable"
         label_matriz = ctk.CTkLabel(frame_matrices, text=f"Matriz {i + 1}:\n{matriz_str}", font=("Courier", 10))
@@ -813,7 +813,7 @@ def transponer_matriz():
             matriz_transpuesta = rotar_matriz_90(matriz)
             consola_transpuesta.insert("end", "Matriz transpuesta:\n")
             for fila in matriz_transpuesta:
-                consola_transpuesta.insert("end", " ".join(f"{elem:8.2f}" for elem in fila) + "\n")
+                consola_transpuesta.insert("end", " ".join(f"{elem:8.4f}" for elem in fila) + "\n")
             logger.log("Matriz transpuesta", matriz_transpuesta)
         except ValueError:
             consola_transpuesta.insert("end", "Error: Asegúrate de que la matriz contiene solo números.\n")
