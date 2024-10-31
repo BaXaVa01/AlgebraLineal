@@ -4,6 +4,8 @@ import customtkinter as ctk
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
+root = ctk.CTk()
+
 # Ventana principal
 app = ctk.CTk()
 app.title("Interfaz de Funciones")
@@ -57,6 +59,14 @@ btn_cos.grid(row=2, column=1, padx=5, pady=5)
 btn_tan.grid(row=2, column=2, padx=5, pady=5)
 btn_log.grid(row=2, column=3, padx=5, pady=5)
 
+# Botón para logaritmo natural
+btn_ln = ctk.CTkButton(button_frame, text="ln", command=lambda: insert_text("ln("), width=60)
+btn_ln.grid(row=3, column=0, padx=5, pady=5)
+
+entry = ctk.CTkEntry(root, width=300)
+entry.pack(padx=10, pady=10)
+# Hacer que la entrada no sea editable
+entry.configure(state='readonly')
 # Botón de limpiar entrada
 btn_clear = ctk.CTkButton(app, text="Limpiar", command=lambda: func_entry.delete(0, "end"), width=300)
 btn_clear.pack(pady=20)
