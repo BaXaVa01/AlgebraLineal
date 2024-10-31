@@ -1,3 +1,4 @@
+import re
 # Función para validar que una matriz no esté vacía y que todas las filas tengan el mismo número de columnas
 def validar_matriz(matriz):
     if not matriz:
@@ -22,6 +23,26 @@ def convertir_fraccion_a_decimal(texto):
             return float(texto)  # Si no es fracción, lo convierte a float directamente
     except ValueError:
         return None  # Si no puede convertir, retorna None
+
+def convertir_fraccion_a_decimal_Latex(fraccion_str):
+    """
+    Convierte todas las fracciones en formato LaTeX a números decimales dentro de una cadena.
+    
+    :param fraccion_str: Cadena que contiene una o más fracciones en formato LaTeX, por ejemplo, "\\frac{1}{2}".
+    :return: Cadena con las fracciones convertidas a sus valores decimales.
+    """
+    # Buscar el formato de fracción \frac{a}{b} y reemplazarlo con su valor decimal
+    patron_fraccion = r"\\frac\{(-?\d+)\}\{(-?\d+)\}"
+    
+    def reemplazar_por_decimal(match):
+        numerador = int(match.group(1))
+        denominador = int(match.group(2))
+        return str(float(Fraction(numerador, denominador)))
+    
+    # Usar sub para reemplazar todas las fracciones encontradas en la cadena
+    resultado = re.sub(patron_fraccion, reemplazar_por_decimal, fraccion_str)
+    
+    return resultado
 
 def validar_entrada_matriz(input_text):
     try:
