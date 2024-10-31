@@ -62,7 +62,8 @@ def resolver_Inversa():
                 imprimir_matriz_monoespaciada(consola_inversa, obtener_segunda_mitad(matriz))
             else:
                 consola_inversa.insert(ctk.END, "No existe Inversa de una matriz con un determinante igual a 0\n------ErrorType: det=0")
-
+        else:
+            consola_inversa.insert(ctk.END, "Error: La matriz debe ser cuadrada para tener inversa.\n")
     except ValueError as e:
         consola_inversa.insert("end", f"Error: {str(e)}\n")
     
