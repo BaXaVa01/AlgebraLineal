@@ -1,5 +1,5 @@
 import sympy as sp
-
+from sympy import sympify,latex
 def crear_funcion(latex_expr):
     """
     Convierte una expresión LaTeX en una función evaluable en Python.
@@ -31,3 +31,15 @@ def identificar_tipo_funcion(latex_expr):
         return "Polinómica"
     else:
         return "Otro tipo o función no clasificada"
+
+
+def convertir_a_latex_sympy(expresion):
+    try:
+        # Convierte la expresión de cadena en una expresión simbólica
+        expr_simp = sympify(expresion)
+        # Convierte la expresión simbólica a LaTeX
+        return f"${latex(expr_simp)}$"
+    except Exception as e:
+        print(f"Error en la conversión a LaTeX: {e}")
+        return None
+

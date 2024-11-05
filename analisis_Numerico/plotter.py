@@ -65,10 +65,3 @@ def crear_frame_con_plot(parent, latex_expr):
         os.remove(image_path)
     except Exception as e:
         print("Error en la generación del gráfico:", e)
-
-# Ejemplo de uso
-if __name__ == "__main__":
-    root = ctk.CTk()
-    root.geometry("800x600")
-    crear_frame_con_plot(root, r"\sin{x} + x^2")  # Ejemplo de expresión en LaTeX
-    root.mainloop()
