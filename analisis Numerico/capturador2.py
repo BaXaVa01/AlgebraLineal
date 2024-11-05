@@ -11,16 +11,16 @@ tabla_visible = False
 
 # Función para procesar la expresión del usuario
 def procesar_funcion(funcion):
-    """
-    Convierte la expresión de entrada del usuario a una que eval pueda interpretar.
-    - Reemplaza `^` por `**` para potencias.
-    - Añade el prefijo `math.` a funciones trigonometricas y logaritmicas.
-    """
     funcion = funcion.replace("^", "**")
     funciones_permitidas = ['sin', 'cos', 'tan', 'log', 'sqrt', 'exp']
     for fn in funciones_permitidas:
         funcion = funcion.replace(f"{fn}(", f"math.{fn}(")
+
+    # Agregar un reemplazo para ln (logaritmo natural)
+    funcion = funcion.replace("ln(", "math.log(")  # Reemplazo para ln
+
     return funcion
+
 
 # Función para ejecutar el método de bisección desde la interfaz
 def ejecutar_biseccion():
