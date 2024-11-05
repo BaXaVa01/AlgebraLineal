@@ -138,7 +138,7 @@ def crear_interfaz_biseccion(tabview):
     consola_pasos_biseccion.pack(pady=10, padx=20)
 
 # Crear la ventana principal y el menú de pestañas
-def main():
+def Interfaz_AN():
     # Crear ventana principal
     root = ctk.CTk()
     root.title("Calculadora y Bisección")
@@ -160,4 +160,4 @@ def main():
 
 # Ejecutar la función principal
 if __name__ == "__main__":
-    main()
+    Interfaz_AN()
