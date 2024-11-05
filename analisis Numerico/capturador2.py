@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from calculadora import mostrar_calculadora  # Importa la función para mostrar la calculadora
 
 # Configuración inicial de la aplicación
 ctk.set_appearance_mode("System")
@@ -46,16 +47,6 @@ def mostrar_pasos_biseccion():
 
 # Función de bisección
 def biseccion(f, a, b, E=1e-5, max_iter=100):
-    """
-    Encuentra una raíz de la función f en el intervalo [a, b] usando el método de bisección.
-    
-    :param f: Función para la cual se busca la raíz.
-    :param a: Límite inferior del intervalo.
-    :param b: Límite superior del intervalo.
-    :param E: Precisión requerida.
-    :param max_iter: Número máximo de iteraciones.
-    :return: Aproximación de la raíz, el error relativo porcentual, los pasos de cada iteración y el número de iteraciones.
-    """
     try:
         if f(a) * f(b) >= 0:
             raise ValueError("La función debe tener signos opuestos en los extremos del intervalo [a, b].")
@@ -102,6 +93,7 @@ def crear_interfaz_biseccion(tabview):
     label_funcion = ctk.CTkLabel(tab_biseccion, text="Función f(x):")
     label_funcion.pack(pady=5)
     funcion_input = ctk.CTkTextbox(tab_biseccion, height=50)
+    funcion_input.bind("<Button-1>", lambda event: mostrar_calculadora(funcion_input))  # Mostrar la calculadora al hacer clic
     funcion_input.pack(pady=5, padx=20)
 
     # Etiqueta y entrada para el límite inferior a
@@ -144,107 +136,6 @@ def crear_interfaz_biseccion(tabview):
     consola_pasos_biseccion = ctk.CTkTextbox(tab_biseccion, height=300, width=500, font=("Courier", 12))
     consola_pasos_biseccion.pack(pady=10, padx=20)
 
-# Crear la interfaz para la calculadora
-def crear_interfaz_calculadora(tabview):
-    global entry, button_frame, side_frame, mode, toggle_button
-
-    # Crear pestaña para la calculadora
-    tab_calculadora = tabview.add("Calculadora")
-
-    # Frame lateral para los botones de cambio de modo y limpiar
-    side_frame = ctk.CTkFrame(tab_calculadora)
-    side_frame.grid(row=0, column=0, padx=10)
-
-    # Frame para los botones numéricos y de funciones
-    button_frame = ctk.CTkFrame(tab_calculadora)
-    button_frame.grid(row=0, column=1, padx=10)
-
-    # Variable para alternar entre modos
-    mode = "Funciones"
-
-    # Función para insertar texto en el campo de entrada
-    def insert_text(text, latexFormat):
-        entry.configure(state='normal')
-        entry.insert(ctk.END, text)
-        entry.configure(state='readonly')
-
-    # Función para alternar entre modos
-    def toggle_mode():
-        global mode
-        mode = "Numérico" if mode == "Funciones" else "Funciones"
-        toggle_button.configure(text=f"Cambiar a {mode}")
-        update_buttons()
-
-    # Actualizar botones según el modo seleccionado
-    def update_buttons():
-        # Limpiar botones existentes
-        for widget in button_frame.winfo_children():
-            widget.destroy()
-        
-        if mode == "Funciones":
-            # Botones de operadores básicos
-            btn_add = ctk.CTkButton(button_frame, text="+", command=lambda: insert_text("+", "\\text{sum}"), width=60)
-            btn_subtract = ctk.CTkButton(button_frame, text="-", command=lambda: insert_text("-", "\\text{subtract}"), width=60)
-            btn_multiply = ctk.CTkButton(button_frame, text="*", command=lambda: insert_text("*", "\\text{multiply}"), width=60)
-            btn_divide = ctk.CTkButton(button_frame, text="/", command=lambda: insert_text("/", "\\text{divide}"), width=60)
-
-            btn_add.grid(row=0, column=0, padx=5, pady=5)
-            btn_subtract.grid(row=0, column=1, padx=5, pady=5)
-            btn_multiply.grid(row=0, column=2, padx=5, pady=5)
-            btn_divide.grid(row=0, column=3, padx=5, pady=5)
-
-            # Botones de funciones avanzadas
-            btn_sqrt = ctk.CTkButton(button_frame, text="√", command=lambda: insert_text("√(", "\\sqrt{}"), width=60)
-            btn_pow = ctk.CTkButton(button_frame, text="^", command=lambda: insert_text("^", "^{}"), width=60)
-            btn_frac = ctk.CTkButton(button_frame, text="a/b", command=lambda: insert_text("/", "\\frac{}{}"), width=60)
-            btn_parentheses = ctk.CTkButton(button_frame, text="(", command=lambda: insert_text("(", "\\left("), width=60)
-            btn_parentheses_right = ctk.CTkButton(button_frame, text=")", command=lambda: insert_text(")", "\\right)"), width=60)
-
-            btn_sqrt.grid(row=1, column=0, padx=5, pady=5)
-            btn_pow.grid(row=1, column=1, padx=5, pady=5)
-            btn_frac.grid(row=1, column=2, padx=5, pady=5)
-            btn_parentheses.grid(row=1, column=3, padx=5, pady=5)
-            btn_parentheses_right.grid(row=1, column=4, padx=5, pady=5)
-
-            # Botones de funciones trigonométricas
-            btn_sin = ctk.CTkButton(button_frame, text="sin", command=lambda: insert_text("sin(", "\\sin{}"), width=60)
-            btn_cos = ctk.CTkButton(button_frame, text="cos", command=lambda: insert_text("cos(", "\\cos{}"), width=60)
-            btn_tan = ctk.CTkButton(button_frame, text="tan", command=lambda: insert_text("tan(", "\\tan{}"), width=60)
-            btn_log = ctk.CTkButton(button_frame, text="log", command=lambda: insert_text("log(", "\\log{}"), width=60)
-
-            btn_sin.grid(row=2, column=0, padx=5, pady=5)
-            btn_cos.grid(row=2, column=1, padx=5, pady=5)
-            btn_tan.grid(row=2, column=2, padx=5, pady=5)
-            btn_log.grid(row=2, column=3, padx=5, pady=5)
-
-        else:
-            # Botones numéricos y de operadores básicos
-            buttons = [
-                ('7', 1, 0), ('8', 1, 1), ('9', 1, 2),
-                ('4', 2, 0), ('5', 2, 1), ('6', 2, 2),
-                ('1', 3, 0), ('2', 3, 1), ('3', 3, 2),
-                ('0', 4, 1), ('.', 4, 0), ('=', 4, 2),
-                ('+', 1, 3), ('-', 2, 3), ('*', 3, 3), ('/', 4, 3)
-            ]
-
-            for (text, row, col) in buttons:
-                ctk.CTkButton(button_frame, text=text, command=lambda t=text: insert_text(t, t), width=60).grid(row=row, column=col, padx=5, pady=5)
-
-    # Botón para alternar entre modos en el frame lateral
-    toggle_button = ctk.CTkButton(side_frame, text="Cambiar a Numérico", command=toggle_mode, width=100)
-    toggle_button.pack(pady=10)
-
-    # Botón de limpiar entrada en el frame lateral
-    btn_clear = ctk.CTkButton(side_frame, text="Limpiar", command=lambda: entry.delete(0, "end"), width=100)
-    btn_clear.pack(pady=10)
-
-    # Campo de entrada
-    entry = ctk.CTkEntry(tab_calculadora, width=400)
-    entry.grid(row=1, column=0, columnspan=2, pady=10)
-
-    # Inicializar los botones en el modo "Funciones"
-    update_buttons()
-
 # Crear la ventana principal y el menú de pestañas
 def main():
     # Crear ventana principal
@@ -259,9 +150,6 @@ def main():
     # Crear el menú de pestañas
     tabview = ctk.CTkTabview(main_frame)
     tabview.pack(fill="both", expand=True, padx=10, pady=10)
-
-    # Crear la interfaz para la calculadora en una pestaña separada
-    crear_interfaz_calculadora(tabview)
 
     # Crear la interfaz para el método de bisección en una pestaña separada
     crear_interfaz_biseccion(tabview)
