@@ -1,7 +1,8 @@
 import customtkinter as ctk
-from PIL import Image, ImageTk, ImageSequence
+from PIL import Image, ImageTk
 from ResolutorDeMatrices.resolutorMatrix import iniciar_interfaz
 from analisis_Numerico.capturador2 import Interfaz_AN
+
 class MatrixCalcApp(ctk.CTk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -10,56 +11,80 @@ class MatrixCalcApp(ctk.CTk):
         self.title("MatrixCalc")
         self.geometry("800x600")
         
-        # Título principal
-        title_label = ctk.CTkLabel(self, text="MatrixCalc", font=("Arial", 24, "bold"))
-        title_label.pack(pady=20)
+        # Diccionario para almacenar los frames de cada interfaz
+        self.frames = {}
         
-        # Frame principal para los botones y el GIF
-        main_frame = ctk.CTkFrame(self)
-        main_frame.pack(pady=10, padx=10, fill="both", expand=True)
+        # Crear los frames para cada interfaz y almacenarlos en el diccionario
+        self.frames["main"] = MainFrame(self, self.show_frame)
+        self.frames["interfaz1"] = Interfaz1Frame(self, self.show_frame)
+        self.frames["interfaz2"] = Interfaz2Frame(self, self.show_frame)
         
-        # Botones para conectar interfaces
-        btn_interface1 = ctk.CTkButton(main_frame, text="Abrir Interfaz 1", command=self.conectar_interface1)
-        btn_interface1.pack(pady=10)
+        # Mostrar el frame principal al inicio
+        self.show_frame("main")
         
-        btn_interface2 = ctk.CTkButton(main_frame, text="Abrir Interfaz 2", command=self.conectar_interface2)
-        btn_interface2.pack(pady=10)
+    def show_frame(self, frame_name):
+        for frame in self.frames.values():
+            frame.pack_forget()
         
-        # Frame para el GIF
-        gif_frame = ctk.CTkFrame(main_frame, width=500, height=300)
-        gif_frame.pack(pady=20)
-        
-        # Mostrar el GIF (opcional)
-        self.display_gif(gif_frame, "ruta/a/tu_gif.gif")
-        
-    def conectar_interface1(self):
-        iniciar_interfaz()
-        
-        
-    def conectar_interface2(self):
-        
-        Interfaz_AN()
-        
-    def display_gif(self, parent, gif_path):
-        try:
-            # Cargar el GIF
-            gif = Image.open(gif_path)
-            
-            # Configurar el GIF para que se ajuste automáticamente al tamaño del frame
-            frames = [ImageTk.PhotoImage(frame.resize((500, 300), Image.ANTIALIAS)) for frame in ImageSequence.Iterator(gif)]
-            label_gif = ctk.CTkLabel(parent)
-            label_gif.pack(fill="both", expand=True)
-            
-            # Función para animar el GIF
-            def animate_gif(frame_index=0):
-                frame = frames[frame_index]
-                label_gif.configure(image=frame)
-                frame_index = (frame_index + 1) % len(frames)
-                self.after(100, animate_gif, frame_index)  # Velocidad de animación
-            
-            animate_gif()  # Iniciar la animación
-        except Exception as e:
-            print("Error al cargar el GIF:", e)
+        if frame_name == "interfaz2":
+            self.frames[frame_name].initialize_interface()
+
+        self.frames[frame_name].pack(fill="both", expand=True)
+
+class MainFrame(ctk.CTkFrame):
+    def __init__(self, parent, show_frame_callback):
+        super().__init__(parent)
+        self.show_frame = show_frame_callback
+
+        # Configuración de la interfaz principal
+        self.configure(bg_color="gray12")  # Fondo oscuro para estilo moderno
+
+        # Título principal estilizado
+        title_label = ctk.CTkLabel(self, text="MatrixCalc", font=("Helvetica", 32, "bold"), text_color="lightblue")
+        title_label.pack(pady=40)
+
+        # Botón para la Interfaz 1
+        btn_interface1 = ctk.CTkButton(
+            self,
+            text="Abrir Interfaz 1",
+            command=lambda: self.show_frame("interfaz1"),
+            font=("Helvetica", 16, "bold"),
+            text_color="white",
+            hover_color="lightblue",
+            fg_color="blue"
+        )
+        btn_interface1.pack(pady=20, ipadx=10, ipady=5)
+
+        # Botón para la Interfaz 2
+        btn_interface2 = ctk.CTkButton(
+            self,
+            text="Abrir Interfaz 2",
+            command=lambda: self.show_frame("interfaz2"),
+            font=("Helvetica", 16, "bold"),
+            text_color="white",
+            hover_color="lightblue",
+            fg_color="green"
+        )
+        btn_interface2.pack(pady=20, ipadx=10, ipady=5)
+
+class Interfaz1Frame(ctk.CTkFrame):
+    def __init__(self, parent, show_frame_callback):
+        super().__init__(parent)
+        self.show_frame = show_frame_callback
+        iniciar_interfaz(self)
+        back_button = ctk.CTkButton(self, text="Volver a la Interfaz Principal", command=lambda: self.show_frame("main"))
+        back_button.pack(pady=10)
+
+class Interfaz2Frame(ctk.CTkFrame):
+    def __init__(self, parent, show_frame_callback):
+        super().__init__(parent)
+        self.show_frame = show_frame_callback
+
+
+    def initialize_interface(self):
+        Interfaz_AN(self.winfo_toplevel())
+        back_button = ctk.CTkButton(self, text="Volver a la Interfaz Principal", command=lambda: self.show_frame("main"))
+        back_button.pack(pady=10)
 
 # Ejecutar la aplicación
 if __name__ == "__main__":

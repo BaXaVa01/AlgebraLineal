@@ -1,6 +1,6 @@
 from tabulate import tabulate
 from fractions import Fraction
-from funcionesMatrices.matrixValidator import obtener_segunda_mitad
+from ResolutorDeMatrices.funcionesMatrices.matrixValidator import obtener_segunda_mitad
 # def printMatrix(matrix:list):
 #     """
 #     Esta funcion acepta solamente matrices como parametro

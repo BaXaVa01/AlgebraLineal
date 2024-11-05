@@ -1,9 +1,9 @@
 import customtkinter as ctk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-from funcionesMatrices.pivoteo import *
-from funcionesMatrices.matrixValidator import *
-from funcionesMatrices.reemplazar import rotar_matriz_90
+from ResolutorDeMatrices.funcionesMatrices.pivoteo import *
+from ResolutorDeMatrices.funcionesMatrices.matrixValidator import *
+from ResolutorDeMatrices.funcionesMatrices.reemplazar import rotar_matriz_90
 from pylatex import Document, Section, Math, Matrix
 from pylatex.utils import NoEscape
 from datetime import datetime
@@ -293,7 +293,7 @@ class TextRedirector:
         pass
 
 
-def verificar_cambio_pestana():
+def verificar_cambio_pestana(root):
     global current_tab
     nueva_tab = notebook.get()
 
@@ -302,7 +302,7 @@ def verificar_cambio_pestana():
         redirigir_consola()  # Redirigir la consola cuando se detecte un cambio de pestaña
     
     # Llamar a esta función periódicamente
-    root.after(100, verificar_cambio_pestana)  # Cada 100 ms se verifica si la pestaña cambió
+    root.after(100, lambda: verificar_cambio_pestana(root))  # Cada 100 ms se verifica si la pestaña cambió
 
 def redirigir_consola():
     # Obtener el nombre de la pestaña seleccionada
@@ -1112,19 +1112,16 @@ def detectar_y_convertir_matrices(ocr_resultado):
     return matrices_convertidas
 
 # Función para inicializar la interfaz
-def iniciar_interfaz():
+def iniciar_interfaz(parent):
     # Inicializar customtkinter
+    # Inicializar customtkinter
+    global root 
+    root=parent
     ctk.set_appearance_mode("dark")  # Modo oscuro (opcional)
     ctk.set_default_color_theme("blue")  # Tema de color
 
-    global root, sidebar_frame, sidebar_frame_content
+    global sidebar_frame, sidebar_frame_content
     
-    # Inicializar la ventana principal
-    root = ctk.CTk()
-    root.title("MATRIXCALC")
-    root.geometry("1000x600")
-    
-
     # Crear el frame para la barra lateral de iconos
     sidebar_frame = ctk.CTkFrame(root, width=sidebar_width, height=600)
     sidebar_frame.pack(side="left", fill="y")
@@ -1593,8 +1590,6 @@ def iniciar_interfaz():
     consola_pasos_biseccion = ctk.CTkTextbox(tab_biseccion, height=200, width=500, font=("Courier", global_font_size))
     consola_pasos_biseccion.pack(pady=10, padx=20)
 
-    # Llamar a la función de verificación periódica después de iniciar la interfaz
-    verificar_cambio_pestana()
 
     #Pestaña "Excel View"
     tab_formateado = notebook.tab("Formateado")
@@ -1694,10 +1689,7 @@ def iniciar_interfaz():
     hacer_consola_droppable(matriz_input_transpuesta)
     
     # Llamar a la función de verificación periódica después de iniciar la interfaz
-    verificar_cambio_pestana()
-
-    # Iniciar la aplicación
-    root.mainloop()
+    verificar_cambio_pestana(root)
 
 # Verificar si el archivo se está ejecutando directamente y no como módulo importado
 if __name__ == "__main__":

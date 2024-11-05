@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from calculadora import mostrar_calculadora  # Importa la función para mostrar la calculadora
+from analisis_Numerico.calculadora import mostrar_calculadora  # Importa la función para mostrar la calculadora
 
 # Configuración inicial de la aplicación
 ctk.set_appearance_mode("System")
@@ -18,9 +18,12 @@ def ejecutar_biseccion():
         # Definir la función a partir de la cadena ingresada
         f = lambda x: eval(funcion)
         
-        # Frame para mostrar el gráfico Matplotlib
-        self.plot_frame = ctk.CTkFrame(self, width=780, height=500)
-        self.plot_frame.pack(padx=10, pady=10, fill="both", expand=True)
+        # Llamar a la función de bisección y obtener resultados
+        raiz, error, pasos, iteraciones = biseccion(f, a, b, E, max_iter)
+
+        # Frame para mostrar el gráfico Matplotlib (si es necesario)
+        plot_frame = ctk.CTkFrame(width=780, height=500)
+        plot_frame.pack(padx=10, pady=10, fill="both", expand=True)
         
         # Mostrar el resultado en la consola
         consola_biseccion.delete("1.0", "end")
@@ -138,14 +141,10 @@ def crear_interfaz_biseccion(tabview):
     consola_pasos_biseccion.pack(pady=10, padx=20)
 
 # Crear la ventana principal y el menú de pestañas
-def Interfaz_AN():
-    # Crear ventana principal
-    root = ctk.CTk()
-    root.title("Calculadora y Bisección")
-    root.geometry("1000x600")
+def Interfaz_AN(parent):
 
-    # Crear frame principal
-    main_frame = ctk.CTkFrame(root)
+    # Crear frame principal dentro de parent
+    main_frame = ctk.CTkFrame(parent)
     main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
     # Crear el menú de pestañas
@@ -154,9 +153,6 @@ def Interfaz_AN():
 
     # Crear la interfaz para el método de bisección en una pestaña separada
     crear_interfaz_biseccion(tabview)
-
-    # Iniciar la aplicación
-    root.mainloop()
 
 # Ejecutar la función principal
 if __name__ == "__main__":

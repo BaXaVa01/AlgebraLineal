@@ -1,6 +1,6 @@
-from funcionesMatrices.printing import *
-from funcionesMatrices.reemplazar import reemplazarFila, alternarFilas
-from funcionesMatrices.matrixFunctions import *
+from ResolutorDeMatrices.funcionesMatrices.printing import *
+from ResolutorDeMatrices.funcionesMatrices.reemplazar import reemplazarFila, alternarFilas
+from ResolutorDeMatrices.funcionesMatrices.matrixFunctions import *
 from fractions import Fraction
 
 def pivoteoMax(matrix, Inverse):

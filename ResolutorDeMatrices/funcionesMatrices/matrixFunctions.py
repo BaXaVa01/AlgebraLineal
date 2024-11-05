@@ -1,4 +1,4 @@
-from funcionesMatrices.printing import printMatrix
+from ResolutorDeMatrices.funcionesMatrices.printing import printMatrix
 def multiplyRow(row:list, multiply):
     
     """Esta funcion lo que hace es muiltiplicar una fila: {row}
