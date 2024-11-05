@@ -1,117 +1,78 @@
 import customtkinter as ctk
-# from Latex_Funct_Validator import crear_funcion
+import matplotlib.pyplot as plt
+import seaborn as sns
+from PIL import Image, ImageTk
+import os
+import tempfile
+from Latex_Funct_Validator import crear_funcion  # Importa tu módulo de funciones aquí
 
-# Configuración inicial de la aplicación
-ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("blue")
+class MatplotlibViewerModule(ctk.CTk):
+    def __init__(self, latex_expr, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Configuración de la ventana principal
+        self.title("Visor de Gráficos Matplotlib - Tema Oscuro")
+        self.geometry("800x600")
+        
+        # Etiqueta de título
+        self.label = ctk.CTkLabel(self, text="Visualización de la Función", font=("Arial", 20))
+        self.label.pack(pady=10)
+        
+        # Frame para mostrar el gráfico Matplotlib
+        self.plot_frame = ctk.CTkFrame(self, width=780, height=500)
+        self.plot_frame.pack(padx=10, pady=10, fill="both", expand=True)
+        
+        # Llamar a la función de graficación
+        self.plot_graph(latex_expr)
 
-# Ventana principal
-app = ctk.CTk()
-app.title("Interfaz de Funciones")
-app.geometry("500x600")
+    def plot_graph(self, latex_expr):
+        try:
+            # Crear la función evaluable a partir de la expresión LaTeX
+            funcion = crear_funcion(latex_expr)
 
-# Campo de texto para ingresar funciones o números
-entry = ctk.CTkEntry(app, width=400, font=("Arial", 20))
-entry.pack(pady=20)
+            # Generar datos para graficar
+            x_values = [x * 0.1 for x in range(-100, 101)]  # Rango de -10 a 10 con pasos de 0.1
+            y_values = [funcion(x) for x in x_values]
 
-# Frame principal que contiene el frame lateral y el frame de botones
-main_frame = ctk.CTkFrame(app)
-main_frame.pack(pady=10, padx=10)
+            # Aplicar estilo de tema oscuro
+            plt.style.use("dark_background")
+            sns.set(style="darkgrid", palette="deep")
 
-# Frame lateral para los botones de cambio de modo y limpiar
-side_frame = ctk.CTkFrame(main_frame)
-side_frame.grid(row=0, column=0, padx=10)
+            # Crear gráfico
+            plt.figure(figsize=(10, 6))
+            plt.plot(x_values, y_values, color="cyan", linewidth=2.5, linestyle='-', label=f"{latex_expr}")
 
-# Frame para los botones numéricos y de funciones
-button_frame = ctk.CTkFrame(main_frame)
-button_frame.grid(row=0, column=1, padx=10)
+            # Personalización del gráfico
+            plt.title("Gráfico de la Función - Tema Oscuro", fontsize=16, fontweight='bold', color="white")
+            plt.xlabel("Eje X", fontsize=14, fontweight='medium', color="lightgrey")
+            plt.ylabel("f(x)", fontsize=14, fontweight='medium', color="lightgrey")
+            plt.xticks(fontsize=12, color="lightgrey")
+            plt.yticks(fontsize=12, color="lightgrey")
+            plt.legend(loc="upper right", fontsize=12, fancybox=True, shadow=True)
 
-# Variable para alternar entre modos
-mode = "Funciones"
+            # Guardar el gráfico como PNG en una carpeta temporal
+            temp_dir = tempfile.gettempdir()
+            image_path = os.path.join(temp_dir, "matplotlib_plot_dark.png")
+            plt.savefig(image_path, bbox_inches='tight', dpi=100)
+            plt.close()  # Cerrar la figura para liberar memoria
 
+            # Cargar la imagen en el frame de la interfaz
+            img = Image.open(image_path)
+            img = img.resize((780, 500), Image.LANCZOS)  # Usar Image.LANCZOS en lugar de Image.ANTIALIAS
+            self.img_tk = ImageTk.PhotoImage(img)
 
-# Función para insertar texto en el campo de entrada
-def insert_text(text, latexFormat):
-    entry.configure(state='normal')
-    entry.insert(ctk.END, text)
-    entry.insert(ctk.END, latexFormat)
-    entry.configure(state='readonly')
-    
+            # Etiqueta de imagen para mostrar el gráfico
+            label_img = ctk.CTkLabel(self.plot_frame, image=self.img_tk)
+            label_img.pack(fill="both", expand=True)
 
-# Función para alternar entre modos
-def toggle_mode():
-    global mode
-    mode = "Numérico" if mode == "Funciones" else "Funciones"
-    toggle_button.configure(text=f"Cambiar a {mode}")
-    update_buttons()
+            # Eliminar la imagen temporal después de cargarla
+            os.remove(image_path)
+        except Exception as e:
+            print("Error en la generación del gráfico:", e)
 
-# Actualizar botones según el modo seleccionado
-def update_buttons():
-    # Limpiar botones existentes
-    for widget in button_frame.winfo_children():
-        widget.destroy()
-    
-    if mode == "Funciones":
-        # Botones de operadores básicos
+# Ejemplo de uso
+if __name__ == "__main__":
+    latex_expr = r"\sin{x} + x^2"  # Ejemplo de expresión en LaTeX
+    app = MatplotlibViewerModule(latex_expr)
+    app.mainloop()
 
-        btn_add = ctk.CTkButton(button_frame, text="+", command=lambda: insert_text("+", "\\text{sum}"), width=60)
-        btn_subtract = ctk.CTkButton(button_frame, text="-", command=lambda: insert_text("-", "\\text{subtract}"), width=60)
-        btn_multiply = ctk.CTkButton(button_frame, text="*", command=lambda: insert_text("*", "\\text{multiply}"), width=60)
-        btn_divide = ctk.CTkButton(button_frame, text="/", command=lambda: insert_text("/", "\\text{divide}"), width=60)
-
-        btn_add.grid(row=0, column=0, padx=5, pady=5)
-        btn_subtract.grid(row=0, column=1, padx=5, pady=5)
-        btn_multiply.grid(row=0, column=2, padx=5, pady=5)
-        btn_divide.grid(row=0, column=3, padx=5, pady=5)
-
-        # Botones de funciones avanzadas
-        btn_sqrt = ctk.CTkButton(button_frame, text="√", command=lambda: insert_text("√(", "\\sqrt{}"), width=60)
-        btn_pow = ctk.CTkButton(button_frame, text="^", command=lambda: insert_text("^", "^{}"), width=60)
-        btn_frac = ctk.CTkButton(button_frame, text="a/b", command=lambda: insert_text("/", "\\frac{}{}"), width=60)
-        btn_parentheses = ctk.CTkButton(button_frame, text="(", command=lambda: insert_text("(", "\\left("), width=60)
-
-        btn_parentheses_right = ctk.CTkButton(button_frame, text=")", command=lambda: insert_text(")", "\\right("), width=60)
-
-        btn_sqrt.grid(row=1, column=0, padx=5, pady=5)
-        btn_pow.grid(row=1, column=1, padx=5, pady=5)
-        btn_frac.grid(row=1, column=2, padx=5, pady=5)
-        btn_parentheses.grid(row=1, column=3, padx=5, pady=5)
-        btn_parentheses_right.grid(row=1, column=4, padx=5, pady=5)
-
-        # Botones de funciones trigonométricas
-        btn_sin = ctk.CTkButton(button_frame, text="sin", command=lambda: insert_text("sin(", "\\sin{}"), width=60)
-        btn_cos = ctk.CTkButton(button_frame, text="cos", command=lambda: insert_text("cos(", "\\cos{}"), width=60)
-        btn_tan = ctk.CTkButton(button_frame, text="tan", command=lambda: insert_text("tan(", "\\tan{}"), width=60)
-        btn_log = ctk.CTkButton(button_frame, text="log", command=lambda: insert_text("log(", "\\log{}"), width=60)
-
-        btn_sin.grid(row=2, column=0, padx=5, pady=5)
-        btn_cos.grid(row=2, column=1, padx=5, pady=5)
-        btn_tan.grid(row=2, column=2, padx=5, pady=5)
-        btn_log.grid(row=2, column=3, padx=5, pady=5)
-
-    else:
-        # Botones numéricos y de operadores básicos
-        buttons = [
-            ('7', 1, 0), ('8', 1, 1), ('9', 1, 2),
-            ('4', 2, 0), ('5', 2, 1), ('6', 2, 2),
-            ('1', 3, 0), ('2', 3, 1), ('3', 3, 2),
-            ('0', 4, 1), ('.', 4, 0), ('=', 4, 2),
-            ('+', 1, 3), ('-', 2, 3), ('*', 3, 3), ('/', 4, 3)
-        ]
-
-        for (text, row, col) in buttons:
-            ctk.CTkButton(button_frame, text=text, command=lambda t=text: insert_text(t), width=60).grid(row=row, column=col, padx=5, pady=5)
-
-# Botón para alternar entre modos en el frame lateral
-toggle_button = ctk.CTkButton(side_frame, text="Cambiar a Numérico", command=toggle_mode, width=100)
-toggle_button.pack(pady=10)
-
-# Botón de limpiar entrada en el frame lateral
-btn_clear = ctk.CTkButton(side_frame, text="Limpiar", command=lambda: func_entry.delete(0, "end"), width=100)
-btn_clear.pack(pady=10)
-
-# Inicializar los botones en el modo "Funciones"
-update_buttons()
-
-# Ejecutar la aplicación
-app.mainloop()
