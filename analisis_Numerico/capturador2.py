@@ -1,10 +1,20 @@
 import customtkinter as ctk
 from analisis_Numerico.calculadora import mostrar_calculadora  # Importa la función para mostrar la calculadora
+from analisis_Numerico.aproxfunctions import definir_intervalo_auto
 
-# Configuración inicial de la aplicación
-ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("blue")
-
+# Función para elegir puntos automáticamente
+def elegir_puntos_automaticamente():
+    funcion = funcion_input.get("1.0", "end-1c")
+    try:
+        a, b = definir_intervalo_auto(funcion)
+        # Escribe los valores automáticamente en los campos de entrada
+        a_input.delete(0, "end")
+        a_input.insert(0, str(a))
+        b_input.delete(0, "end")
+        b_input.insert(0, str(b))
+    except Exception as e:
+        consola_biseccion.delete("1.0", "end")
+        consola_biseccion.insert("1.0", f"Error al calcular puntos automáticamente: {e}")
 # Función para ejecutar el método de bisección desde la interfaz
 def ejecutar_biseccion():
     try:
@@ -99,6 +109,10 @@ def crear_interfaz_biseccion(tabview):
     funcion_input = ctk.CTkTextbox(tab_biseccion, height=50)
     funcion_input.bind("<Button-1>", lambda event: mostrar_calculadora(funcion_input))  # Mostrar la calculadora al hacer clic
     funcion_input.pack(pady=5, padx=20)
+    
+    # Botón para elegir puntos automáticamente
+    btn_automatic_points = ctk.CTkButton(tab_biseccion, text="Elegir puntos automáticamente", command=elegir_puntos_automaticamente)
+    btn_automatic_points.pack(pady=10)
 
     # Etiqueta y entrada para el límite inferior a
     label_a = ctk.CTkLabel(tab_biseccion, text="Límite inferior a:")
