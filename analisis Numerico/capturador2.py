@@ -36,7 +36,7 @@ def insert_text(text, latexFormat):
     entry.insert(ctk.END, text)
     entry.insert(ctk.END, latexFormat)
     entry.configure(state='readonly')
-    entry.
+    
 
 # Función para alternar entre modos
 def toggle_mode():
