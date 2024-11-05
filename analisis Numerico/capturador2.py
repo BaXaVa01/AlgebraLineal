@@ -18,8 +18,9 @@ def ejecutar_biseccion():
         # Definir la función a partir de la cadena ingresada
         f = lambda x: eval(funcion)
         
-        # Ejecutar el método de bisección
-        raiz, error, pasos, iteraciones = biseccion(f, a, b, E, max_iter)
+        # Frame para mostrar el gráfico Matplotlib
+        self.plot_frame = ctk.CTkFrame(self, width=780, height=500)
+        self.plot_frame.pack(padx=10, pady=10, fill="both", expand=True)
         
         # Mostrar el resultado en la consola
         consola_biseccion.delete("1.0", "end")
