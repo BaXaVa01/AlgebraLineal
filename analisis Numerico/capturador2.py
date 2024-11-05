@@ -1,8 +1,26 @@
 import customtkinter as ctk
+from tkinter import ttk, Text
+import math  # Importamos math para usar funciones matemáticas de forma segura.
 
 # Configuración inicial de la aplicación
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
+
+# Variable para mostrar/ocultar la tabla
+tabla_visible = False
+
+# Función para procesar la expresión del usuario
+def procesar_funcion(funcion):
+    """
+    Convierte la expresión de entrada del usuario a una que eval pueda interpretar.
+    - Reemplaza `^` por `**` para potencias.
+    - Añade el prefijo `math.` a funciones trigonometricas y logaritmicas.
+    """
+    funcion = funcion.replace("^", "**")
+    funciones_permitidas = ['sin', 'cos', 'tan', 'log', 'sqrt', 'exp']
+    for fn in funciones_permitidas:
+        funcion = funcion.replace(f"{fn}(", f"math.{fn}(")
+    return funcion
 
 # Función para ejecutar el método de bisección desde la interfaz
 def ejecutar_biseccion():
@@ -14,8 +32,9 @@ def ejecutar_biseccion():
         E = float(tol_input.get())
         max_iter = int(max_iter_input.get())
         
-        # Definir la función a partir de la cadena ingresada
-        f = lambda x: eval(funcion)
+        # Procesar y definir la función de la expresión ingresada
+        funcion = procesar_funcion(funcion)
+        f = lambda x: eval(funcion, {"x": x, "math": math})
         
         # Ejecutar el método de bisección
         raiz, error, pasos, iteraciones = biseccion(f, a, b, E, max_iter)
@@ -23,8 +42,8 @@ def ejecutar_biseccion():
         # Mostrar el resultado en la consola
         consola_biseccion.delete("1.0", "end")
         if raiz is not None:
-            consola_biseccion.insert("1.0", f"El método converge a {iteraciones} iteraciones.\n")
-            consola_biseccion.insert("end", f"La raíz es: {raiz} con un error relativo porcentual de: {error}%")
+            consola_biseccion.insert("1.0", f"El método converge a {iteraciones} iteraciones.\n", "bold")
+            consola_biseccion.insert("end", f"La raíz es: {raiz} con un error relativo porcentual de: {error}%", "bold")
         
         # Guardar los pasos en una variable global para mostrarlos después
         global pasos_biseccion
@@ -39,23 +58,30 @@ def ejecutar_biseccion():
         consola_biseccion.delete("1.0", "end")
         consola_biseccion.insert("1.0", f"Error inesperado: {e}")
 
+def mostrar_ocultar_tabla():
+    global tabla_visible
+    if not tabla_visible:
+        mostrar_pasos_biseccion()
+        tree.pack(pady=10, padx=20, fill="both", expand=True)
+        btn_mostrar_tabla.config(text="Ocultar tabla de resultados")
+        tabla_visible = True
+    else:
+        tree.pack_forget()
+        btn_mostrar_tabla.config(text="Mostrar tabla de resultados")
+        tabla_visible = False
+
 def mostrar_pasos_biseccion():
-    consola_pasos_biseccion.delete("1.0", "end")
+    # Limpiar la tabla antes de insertar nuevos datos
+    for row in tree.get_children():
+        tree.delete(row)
+    
+    # Insertar los pasos en la tabla
     for paso in pasos_biseccion:
-        consola_pasos_biseccion.insert("end", paso + "\n")
+        iteracion, xi, xu, xr, Ea, yi, yu, yr = paso.split(", ")
+        tree.insert("", "end", values=(iteracion, xi, xu, xr, Ea, yi, yu, yr))
 
 # Función de bisección
 def biseccion(f, a, b, E=1e-5, max_iter=100):
-    """
-    Encuentra una raíz de la función f en el intervalo [a, b] usando el método de bisección.
-    
-    :param f: Función para la cual se busca la raíz.
-    :param a: Límite inferior del intervalo.
-    :param b: Límite superior del intervalo.
-    :param E: Precisión requerida.
-    :param max_iter: Número máximo de iteraciones.
-    :return: Aproximación de la raíz, el error relativo porcentual, los pasos de cada iteración y el número de iteraciones.
-    """
     try:
         if f(a) * f(b) >= 0:
             raise ValueError("La función debe tener signos opuestos en los extremos del intervalo [a, b].")
@@ -68,17 +94,20 @@ def biseccion(f, a, b, E=1e-5, max_iter=100):
         
         while (b - a) / 2.0 > E and iter_count < max_iter:
             c = (a + b) / 2.0
-            pasos.append(f"Iteración {iter_count + 1}: a = {a}, b = {b}, c = {c}, f(c) = {f(c)}")
+            yi = f(a)
+            yu = f(b)
+            yr = f(c)
+            if iter_count > 0:
+                error_relativo = abs((c - prev_c) / c) * 100
+            else:
+                error_relativo = float('inf')
+            pasos.append(f"{iter_count + 1}, {a}, {b}, {c}, {error_relativo}, {yi}, {yu}, {yr}")
             if f(c) == 0:
                 return c, 0, pasos, iter_count + 1  # La raíz exacta ha sido encontrada
             elif f(a) * f(c) < 0:
                 b = c
             else:
                 a = c
-            
-            # Calcular el error relativo porcentual
-            if iter_count > 0:
-                error_relativo = abs((c - prev_c) / c) * 100
             
             prev_c = c
             iter_count += 1
@@ -93,56 +122,71 @@ def biseccion(f, a, b, E=1e-5, max_iter=100):
 
 # Crear la interfaz para el método de bisección
 def crear_interfaz_biseccion(tabview):
-    global funcion_input, a_input, b_input, tol_input, max_iter_input, consola_biseccion, consola_pasos_biseccion, pasos_biseccion
+    global funcion_input, a_input, b_input, tol_input, max_iter_input, consola_biseccion, pasos_biseccion, tree, btn_mostrar_tabla
 
     # Crear pestaña para el método de bisección
     tab_biseccion = tabview.add("Bisección")
 
     # Etiqueta y entrada para la función
-    label_funcion = ctk.CTkLabel(tab_biseccion, text="Función f(x):")
+    label_funcion = ctk.CTkLabel(tab_biseccion, text="Función f(x):", font=("Arial", 14, "bold"))
     label_funcion.pack(pady=5)
-    funcion_input = ctk.CTkTextbox(tab_biseccion, height=50)
+    funcion_input = ctk.CTkTextbox(tab_biseccion, height=50, font=("Arial", 12))
     funcion_input.pack(pady=5, padx=20)
 
     # Etiqueta y entrada para el límite inferior a
-    label_a = ctk.CTkLabel(tab_biseccion, text="Límite inferior a:")
+    label_a = ctk.CTkLabel(tab_biseccion, text="Límite inferior a:", font=("Arial", 14, "bold"))
     label_a.pack(pady=5)
-    a_input = ctk.CTkEntry(tab_biseccion)
+    a_input = ctk.CTkEntry(tab_biseccion, font=("Arial", 12))
     a_input.pack(pady=5)
 
     # Etiqueta y entrada para el límite superior b
-    label_b = ctk.CTkLabel(tab_biseccion, text="Límite superior b:")
+    label_b = ctk.CTkLabel(tab_biseccion, text="Límite superior b:", font=("Arial", 14, "bold"))
     label_b.pack(pady=5)
-    b_input = ctk.CTkEntry(tab_biseccion)
+    b_input = ctk.CTkEntry(tab_biseccion, font=("Arial", 12))
     b_input.pack(pady=5)
 
     # Etiqueta y entrada para la tolerancia
-    label_tol = ctk.CTkLabel(tab_biseccion, text="Tolerancia:")
+    label_tol = ctk.CTkLabel(tab_biseccion, text="Tolerancia:", font=("Arial", 14, "bold"))
     label_tol.pack(pady=5)
-    tol_input = ctk.CTkEntry(tab_biseccion)
+    tol_input = ctk.CTkEntry(tab_biseccion, font=("Arial", 12))
     tol_input.pack(pady=5)
 
     # Etiqueta y entrada para el número máximo de iteraciones
-    label_max_iter = ctk.CTkLabel(tab_biseccion, text="Número máximo de iteraciones:")
+    label_max_iter = ctk.CTkLabel(tab_biseccion, text="Número máximo de iteraciones:", font=("Arial", 14, "bold"))
     label_max_iter.pack(pady=5)
-    max_iter_input = ctk.CTkEntry(tab_biseccion)
+    max_iter_input = ctk.CTkEntry(tab_biseccion, font=("Arial", 12))
     max_iter_input.pack(pady=5)
 
     # Botón para ejecutar el método de bisección
-    btn_ejecutar_biseccion = ctk.CTkButton(tab_biseccion, text="Ejecutar Bisección", command=ejecutar_biseccion)
+    btn_ejecutar_biseccion = ctk.CTkButton(tab_biseccion, text="Ejecutar Bisección", command=ejecutar_biseccion, font=("Arial", 12, "bold"))
     btn_ejecutar_biseccion.pack(pady=10)
 
     # Consola para mostrar los resultados
-    consola_biseccion = ctk.CTkTextbox(tab_biseccion, height=100, width=450, font=("Courier", 12))
+    consola_biseccion = Text(tab_biseccion, height=5, width=60, font=("Courier", 12))
+    consola_biseccion.tag_configure("bold", font=("Courier", 12, "bold"))
     consola_biseccion.pack(pady=10, padx=20)
 
-    # Botón para mostrar los pasos
-    btn_mostrar_pasos = ctk.CTkButton(tab_biseccion, text="Mostrar Pasos", command=mostrar_pasos_biseccion)
-    btn_mostrar_pasos.pack(pady=10)
+    # Botón para mostrar/ocultar la tabla de resultados
+    btn_mostrar_tabla = ctk.CTkButton(tab_biseccion, text="Mostrar tabla de resultados", command=mostrar_ocultar_tabla, font=("Arial", 12, "bold"))
+    btn_mostrar_tabla.pack(pady=10)
 
-    # Consola para mostrar los pasos
-    consola_pasos_biseccion = ctk.CTkTextbox(tab_biseccion, height=300, width=500, font=("Courier", 12))
-    consola_pasos_biseccion.pack(pady=10, padx=20)
+    # Crear la tabla (inicialmente oculta)
+    tree = ttk.Treeview(tab_biseccion, columns=("Iteración", "xi", "xu", "xr", "Ea", "yi", "yu", "yr"), show="headings")
+    tree.heading("Iteración", text="Iteración")
+    tree.heading("xi", text="xi")
+    tree.heading("xu", text="xu")
+    tree.heading("xr", text="xr")
+    tree.heading("Ea", text="Ea")
+    tree.heading("yi", text="yi")
+    tree.heading("yu", text="yu")
+    tree.heading("yr", text="yr")
+
+    # Estilo para mejorar la apariencia de la tabla
+    style = ttk.Style()
+    style.configure("Treeview.Heading", font=("Arial", 10, "bold"), background="lightblue")
+    style.configure("Treeview", font=("Arial", 10), rowheight=25)
+    style.map("Treeview", background=[("selected", "lightgreen")])
+
 
 # Crear la interfaz para la calculadora
 def crear_interfaz_calculadora(tabview):
@@ -239,7 +283,7 @@ def crear_interfaz_calculadora(tabview):
     btn_clear.pack(pady=10)
 
     # Campo de entrada
-    entry = ctk.CTkEntry(tab_calculadora, width=400)
+    entry = ctk.CTkEntry(tab_calculadora, width=400, font=("Arial", 14))
     entry.grid(row=1, column=0, columnspan=2, pady=10)
 
     # Inicializar los botones en el modo "Funciones"
