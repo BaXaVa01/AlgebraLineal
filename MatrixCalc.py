@@ -25,10 +25,13 @@ class MatrixCalcApp(ctk.CTk):
         for frame in self.frames.values():
             frame.pack_forget()
         
-        # Inicializar interfaz específica si es necesario
-        if frame_name == "interfaz2" and not self.frames["interfaz2"].winfo_ismapped():
+        # Reinicializar Interfaz2Frame y BiseccionInterface cada vez que se muestra
+        if frame_name == "interfaz2":
+            # Destruye la instancia anterior de Interfaz2Frame y vuelve a crearla
+            self.frames["interfaz2"].destroy()
+            self.frames["interfaz2"] = Interfaz2Frame(self, self.show_frame)
             self.frames["interfaz2"].initialize_interface()
-        
+
         # Mostrar el frame seleccionado
         self.frames[frame_name].pack(fill="both", expand=True)
 

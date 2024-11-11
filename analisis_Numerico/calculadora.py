@@ -27,27 +27,29 @@ def mostrar_calculadora(entry_destino):
     button_frame = ctk.CTkFrame(calc_window)
     button_frame.pack(pady=10, padx=10)
 
-    # Función para insertar texto en el entry destino
-# Función para insertar texto en la posición del cursor en un CTkTextbox
-# Función para insertar texto en la posición del cursor en un CTkTextbox
     def insert_text(text):
-        # Habilitar el campo de entrada temporalmente
+        # Habilitar el campo de entrada temporalmente (normal en lugar de readonly)
         entry_destino.configure(state='normal')
-        cursor_position = entry_destino.index("insert")  # Obtener la posición actual del cursor, en formato "line.column"
+
+        # Obtener la posición actual del cursor y extraer solo la columna como entero
+        cursor_position = entry_destino.index("insert")
+        cursor_column = int(cursor_position.split('.')[1])  # Extrae la columna y la convierte a entero
         
-        # Extraer solo la columna de la posición y convertirla a entero
-        cursor_column = int(cursor_position.split('.')[1])  # Obtiene solo la columna como entero
-        
-        current_text = entry_destino.get("1.0", "end-1c")  # Obtener el texto actual del campo de entrada
-        
+        # Verificar si entry_destino es un CTkTextbox o CTkEntry y obtener el texto actual
+        if isinstance(entry_destino, ctk.CTkTextbox):
+            current_text = entry_destino.get("1.0", "end-1c")  # Obtener todo el texto en un CTkTextbox
+        else:
+            current_text = entry_destino.get()  # Obtener el texto en un CTkEntry
+
         # Verificar si se debe insertar un "*" antes de la nueva entrada
         if cursor_column > 0 and current_text[cursor_column - 1].isdigit():
             entry_destino.insert(cursor_position, "*")
             cursor_position = entry_destino.index("insert")  # Actualizar la posición después de insertar "*"
-        
+
         # Insertar el texto en la posición del cursor
         entry_destino.insert(cursor_position, text)
-        entry_destino.configure(state='readonly')  # Bloquear el campo de entrada nuevamente
+        entry_destino.configure(state='disabled')  # Bloquear el campo de entrada nuevamente
+
 
 
     # Función para alternar entre modos
@@ -99,6 +101,15 @@ def mostrar_calculadora(entry_destino):
             btn_tan.grid(row=2, column=2, padx=5, pady=5)
             btn_log.grid(row=2, column=3, padx=5, pady=5)
 
+            # Botones de variables x, y, z
+            btn_x = ctk.CTkButton(button_frame, text="x", command=lambda: insert_text("x"), width=60)
+            btn_y = ctk.CTkButton(button_frame, text="y", command=lambda: insert_text("y"), width=60)
+            btn_z = ctk.CTkButton(button_frame, text="z", command=lambda: insert_text("z"), width=60)
+
+            btn_x.grid(row=3, column=0, padx=5, pady=5)
+            btn_y.grid(row=3, column=1, padx=5, pady=5)
+            btn_z.grid(row=3, column=2, padx=5, pady=5)
+
         else:
             # Botones numéricos y de operadores básicos
             buttons = [
@@ -118,4 +129,5 @@ def mostrar_calculadora(entry_destino):
 
     # Inicializar botones en el modo "Funciones"
     update_buttons()
+
 

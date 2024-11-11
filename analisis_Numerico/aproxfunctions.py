@@ -21,28 +21,28 @@ def detectar_desplazamientos(expr):
             if arg.has(x):
                 if arg.is_Add or arg.is_Mul:
                     desplazamiento_x = -arg.as_independent(x, as_Add=True)[1]
-    
-    return float(desplazamiento_x), float(desplazamiento_y)
+
+    # Asegurarse de que ambos desplazamientos sean numéricos
+    return float(N(desplazamiento_x)), float(N(desplazamiento_y))
+
+from sympy import N  # N convierte expresiones a numéricos cuando es posible
 
 def definir_intervalo_auto(funcion_str):
-    """
-    Define un intervalo automático basado en el tipo de función y los desplazamientos.
-    """
     x = sp.symbols('x')
     expr = parse_expr(funcion_str)
     
     # Detectar desplazamientos
     desplazamiento_x, desplazamiento_y = detectar_desplazamientos(expr)
     
-    # Seleccionar un intervalo basado en el tipo de función
+    # Seleccionar un intervalo basado en el tipo de función y convertir desplazamientos a float cuando sea posible
     if expr.has(sp.sin, sp.cos, sp.tan):
-        intervalo = (-2 * sp.pi + desplazamiento_x, 2 * sp.pi + desplazamiento_x)
+        intervalo = (float(N(-2 * sp.pi + desplazamiento_x)), float(N(2 * sp.pi + desplazamiento_x)))
     elif expr.has(sp.log):
-        intervalo = (0.1 + desplazamiento_x, 10 + desplazamiento_x)
+        intervalo = (float(N(0.1 + desplazamiento_x)), float(N(10 + desplazamiento_x)))
     elif expr.has(sp.exp):
-        intervalo = (-5 + desplazamiento_x, 5 + desplazamiento_x)
+        intervalo = (float(N(-5 + desplazamiento_x)), float(N(5 + desplazamiento_x)))
     elif expr.is_polynomial():
-        intervalo = (-10 + desplazamiento_y, 10 + desplazamiento_y)
+        intervalo = (float(N(-10 + desplazamiento_y)), float(N(10 + desplazamiento_y)))
     else:
         intervalo = (-10, 10)
     

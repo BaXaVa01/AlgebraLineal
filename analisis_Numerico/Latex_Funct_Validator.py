@@ -1,16 +1,12 @@
 import sympy as sp
 from sympy import sympify,latex
-def crear_funcion(latex_expr):
+def crear_funcion(expr_text):
     """
-    Convierte una expresión LaTeX en una función evaluable en Python.
+    Convierte una cadena de texto (como 'x-2') en una función evaluable en Python.
     """
-    # Parsear la expresión LaTeX a una expresión simbólica de sympy
-    expr = sp.sympify(sp.parsing.latex.parse_latex(latex_expr))
     x = sp.symbols('x')
-
-    # Convertir la expresión en una función lambda para evaluación rápida
-    funcion = sp.lambdify(x, expr, 'math')
-    return funcion
+    expr = sp.sympify(expr_text)  # Convierte el texto en una expresión simbólica
+    return sp.lambdify(x, expr, 'math')  # Devuelve una función evaluable en Python
 
 def identificar_tipo_funcion(latex_expr):
     """
