@@ -200,6 +200,8 @@ def crear_interfaz_introductoria(tabview):
     label_instrucciones.pack(pady=20, padx=20)
 
 
+
+
 def crear_interfaz_calculadora(tabview):
     global entry, entry_text, calculadora_frame
 
@@ -228,15 +230,30 @@ def crear_interfaz_calculadora(tabview):
     def evaluate_expression():
         global entry_text
         try:
-            entry_text = re.sub(r'(\d+)([a-zA-Z])', r'\1*\2', entry_text)
-            result = eval(entry_text, {"__builtins__": None}, {"sin": sin, "cos": cos, "tan": tan, "log": log, "sqrt": sqrt, "pi": pi, "e": e})
+            # Crear una copia de entry_text para evaluar, realizando los reemplazos necesarios
+            expression_to_evaluate = entry_text
+
+            # Reemplazar ^ con ** para la potencia
+            expression_to_evaluate = expression_to_evaluate.replace("^", "**")
+            
+            # Insertar * entre un número y una variable o función (por ejemplo, 2x -> 2*x)
+            expression_to_evaluate = re.sub(r'(\d)([a-zA-Z\(])', r'\1*\2', expression_to_evaluate)
+            
+            # Evaluar la expresión
+            result = eval(expression_to_evaluate, {"__builtins__": None}, {
+                "sin": sin, "cos": cos, "tan": tan, "log": log, "sqrt": sqrt, "pi": pi, "e": e
+            })
+
+            # Mostrar el resultado en la entrada
             entry.delete(0, ctk.END)
             entry.insert(0, str(result))
             entry_text = str(result)
-        except Exception as e:
+        except Exception:
+            # Mostrar error si la evaluación falla
             entry.delete(0, ctk.END)
             entry.insert(0, "Error")
             entry_text = ""
+
 
     # Función para borrar la entrada
     def clear_entry():
@@ -258,6 +275,7 @@ def crear_interfaz_calculadora(tabview):
     # Crear botones en la interfaz
     for i, row in enumerate(buttons):
         for j, btn_text in enumerate(row):
+            # Asignar función a cada botón
             if btn_text == 'C':
                 button = ctk.CTkButton(calculadora_frame, text=btn_text, width=60, command=clear_entry)
             elif btn_text == '=':
@@ -265,7 +283,12 @@ def crear_interfaz_calculadora(tabview):
             elif btn_text == 'clear':
                 button = ctk.CTkButton(calculadora_frame, text="Clear", width=60, command=clear_entry)
             else:
-                button = ctk.CTkButton(calculadora_frame, text=btn_text, width=60, command=lambda t=btn_text: insert_text(t))
+                # Autocompletar para funciones trigonométricas y logarítmicas
+                if btn_text in ('sin', 'cos', 'tan', 'log', 'sqrt'):
+                    command = lambda t=btn_text: insert_text(f"{t}(")
+                else:
+                    command = lambda t=btn_text: insert_text(t)
+                button = ctk.CTkButton(calculadora_frame, text=btn_text, width=60, command=command)
             button.grid(row=i+1, column=j, padx=5, pady=5)
 
 # Función para crear la interfaz de graficador
