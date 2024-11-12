@@ -3,6 +3,9 @@ import sympy as sp
 
 def newton_raphson(funcion_str, x0, tol=1e-6, max_iter=1000):
     x = sp.symbols('x')
+    if not funcion_str:
+        raise ValueError("La función no puede estar vacía.")
+
     try:
         # Convertir la función y calcular la derivada
         funcion = sp.sympify(funcion_str)

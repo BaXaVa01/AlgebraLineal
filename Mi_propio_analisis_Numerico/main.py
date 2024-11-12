@@ -12,7 +12,8 @@ from sympy import sympify, latex, symbols
 from PIL import Image, ImageTk
 import io
 import matplotlib.pyplot as plt
-
+import animation  # Importa el archivo de animación
+import subprocess  # Para ejecutar Manim en un proceso separado
 from PIL import Image, ImageTk
 
 # Configuración inicial de la aplicación
@@ -22,6 +23,39 @@ ctk.set_default_color_theme("blue")
 tabla_visible = False  # Variable para mostrar/ocultar la tabla en el método de Bisección
 
 
+
+import tempfile
+
+import subprocess
+
+# Función para guardar `funcion_str` en un archivo temporal
+def guardar_funcion_temp(funcion):
+    with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".txt") as temp_file:
+        temp_file.write(funcion)
+        print(f"Archivo temporal creado: {temp_file.name}")  # Agregar esta línea
+        return temp_file.name
+
+# Generar el GIF para Bisección usando el archivo temporal
+def generar_gif_biseccion():
+    funcion = funcion_input_biseccion.get("1.0", "end-1c").strip()
+    if not funcion:
+        messagebox.showerror("Error", "Por favor, ingresa una función válida.")
+        return
+    temp_file = guardar_funcion_temp(funcion)  # Guardar la función en un archivo temporal
+    subprocess.run([
+        "manim", "-pql", "animation.py", "BiseccionAnimation", "--format=gif", temp_file
+    ])
+
+# Generar el GIF para Newton-Raphson usando el archivo temporal
+def generar_gif_newton():
+    funcion = funcion_input_newton.get("1.0", "end-1c").strip()
+    if not funcion:
+        messagebox.showerror("Error", "Por favor, ingresa una función válida.")
+        return
+    temp_file = guardar_funcion_temp(funcion)  # Guardar la función en un archivo temporal
+    subprocess.run([
+        "manim", "-pql", "animation.py", "NewtonRaphsonAnimation", "--format=gif", temp_file
+    ])
 
 
 # Función para ejecutar el método de Bisección desde la interfaz
@@ -130,6 +164,9 @@ def crear_interfaz_biseccion(tabview):
 
     btn_ejecutar_biseccion = ctk.CTkButton(tab_biseccion, text="Ejecutar Bisección", command=ejecutar_biseccion, font=("Arial", 12, "bold"))
     btn_ejecutar_biseccion.pack(pady=10)
+    btn_animar_biseccion = ctk.CTkButton(tab_biseccion, text="Generar GIF Bisección", command=generar_gif_biseccion, font=("Arial", 12, "bold"))
+    btn_animar_biseccion.pack(pady=10)
+
 
     consola_biseccion = Text(tab_biseccion, height=5, width=60, font=("Courier", 12))
     consola_biseccion.tag_configure("bold", font=("Courier", 12, "bold"))
@@ -165,6 +202,10 @@ def crear_interfaz_newton(tabview):
 
     btn_ejecutar_newton = ctk.CTkButton(tab_newton, text="Calcular Raíz", command=ejecutar_newton_raphson, font=("Arial", 12, "bold"))
     btn_ejecutar_newton.pack(pady=10)
+    btn_animar_newton = ctk.CTkButton(tab_newton, text="Generar GIF Newton-Raphson", command=generar_gif_newton, font=("Arial", 12, "bold"))
+    btn_animar_newton.pack(pady=10)
+
+
 
     consola_newton = Text(tab_newton, height=15, width=60, font=("Courier", 12))
     consola_newton.pack(pady=10, padx=20)
