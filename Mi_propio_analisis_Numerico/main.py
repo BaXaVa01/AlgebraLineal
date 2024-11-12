@@ -9,6 +9,8 @@ import re
 import numpy as np
 from plotter import graficar_funcion
 
+from PIL import Image, ImageTk
+
 # Configuración inicial de la aplicación
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
@@ -166,6 +168,37 @@ def crear_interfaz_newton(tabview):
 # Función para crear la interfaz de la calculadora estilo GeoGebra
 
 
+def crear_interfaz_introductoria(tabview):
+    # Crear una nueva pestaña para la introducción
+    tab_intro = tabview.add("Introducción")
+
+    # Cargar y mostrar la imagen de bienvenida
+    try:
+        imagen = Image.open("noelle.png")  # Cambia 'bienvenida.png' por el nombre de tu imagen
+        imagen = imagen.resize((300, 200))
+        imagen = ImageTk.PhotoImage(imagen)
+        label_imagen = ctk.CTkLabel(tab_intro, image=imagen)
+        label_imagen.image = imagen  # Mantener referencia para que no se borre de memoria
+        label_imagen.pack(pady=10)
+    except Exception as e:
+        print(f"Error al cargar la imagen: {e}")
+
+    # Título de bienvenida
+    label_titulo = ctk.CTkLabel(tab_intro, text="Bienvenido a la App de Métodos Numéricos", font=("Arial", 18, "bold"))
+    label_titulo.pack(pady=10)
+
+    # Texto de instrucciones
+    instrucciones = (
+        "Esta aplicación ofrece varias herramientas numéricas para ayudar con el cálculo y visualización de funciones:\n\n"
+        "1. **Calculadora Estilo GeoGebra**: Realiza cálculos matemáticos avanzados incluyendo funciones trigonométricas.\n"
+        "2. **Método de Bisección**: Calcula raíces de funciones en intervalos específicos.\n"
+        "3. **Método de Newton-Raphson**: Encuentra raíces de funciones usando aproximaciones sucesivas.\n"
+        "4. **Graficador de Funciones**: Genera gráficos para visualizar cualquier función matemática en un rango especificado.\n\n"
+        "Para empezar, selecciona una de las pestañas en la parte superior."
+    )
+    label_instrucciones = ctk.CTkLabel(tab_intro, text=instrucciones, font=("Arial", 12), justify="left", wraplength=400)
+    label_instrucciones.pack(pady=20, padx=20)
+
 
 def crear_interfaz_calculadora(tabview):
     global entry, entry_text, calculadora_frame
@@ -320,10 +353,10 @@ def main():
 
     tabview = ctk.CTkTabview(main_frame)
     tabview.pack(fill="both", expand=True, padx=10, pady=10)
-
+    crear_interfaz_introductoria(tabview)
+    crear_interfaz_calculadora(tabview)
     crear_interfaz_biseccion(tabview)
     crear_interfaz_newton(tabview)
-    crear_interfaz_calculadora(tabview)
     crear_interfaz_graficador(tabview)
 
     root.mainloop()
