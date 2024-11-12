@@ -4,12 +4,19 @@ from tkinter import ttk, Text, messagebox
 import biseccion_logic  
 import newton_raphson_logic  
 import math
+from math import sin, cos, tan, log, sqrt, pi, e
+import re
+import numpy as np
+from plotter import graficar_funcion
 
 # Configuración inicial de la aplicación
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
 tabla_visible = False  # Variable para mostrar/ocultar la tabla en el método de Bisección
+
+
+
 
 # Función para ejecutar el método de Bisección desde la interfaz
 def ejecutar_biseccion():
@@ -156,6 +163,152 @@ def crear_interfaz_newton(tabview):
     consola_newton = Text(tab_newton, height=15, width=60, font=("Courier", 12))
     consola_newton.pack(pady=10, padx=20)
 
+# Función para crear la interfaz de la calculadora estilo GeoGebra
+
+
+
+def crear_interfaz_calculadora(tabview):
+    global entry, entry_text, calculadora_frame
+
+    # Crear pestaña para la calculadora en el tabview
+    tab_calculadora = tabview.add("Calculadora")
+
+    # Frame para centrar la calculadora dentro de la pestaña
+    calculadora_frame = ctk.CTkFrame(tab_calculadora)
+    calculadora_frame.pack(expand=True)  # Centrar el frame en la pestaña
+
+    # Inicializar variable de entrada
+    entry_text = ""
+
+    # Campo de entrada
+    entry = ctk.CTkEntry(calculadora_frame, width=300, font=("Arial", 20))
+    entry.grid(row=0, column=0, columnspan=4, pady=10, padx=10)
+
+    # Función para insertar texto en la entrada
+    def insert_text(text):
+        global entry_text
+        entry_text += text
+        entry.delete(0, ctk.END)
+        entry.insert(0, entry_text)
+
+    # Función para evaluar la expresión en la entrada
+    def evaluate_expression():
+        global entry_text
+        try:
+            entry_text = re.sub(r'(\d+)([a-zA-Z])', r'\1*\2', entry_text)
+            result = eval(entry_text, {"__builtins__": None}, {"sin": sin, "cos": cos, "tan": tan, "log": log, "sqrt": sqrt, "pi": pi, "e": e})
+            entry.delete(0, ctk.END)
+            entry.insert(0, str(result))
+            entry_text = str(result)
+        except Exception as e:
+            entry.delete(0, ctk.END)
+            entry.insert(0, "Error")
+            entry_text = ""
+
+    # Función para borrar la entrada
+    def clear_entry():
+        global entry_text
+        entry_text = ""
+        entry.delete(0, ctk.END)
+
+    # Botones numéricos, operaciones y funciones
+    buttons = [
+        ('7', '8', '9', '/'),
+        ('4', '5', '6', '*'),
+        ('1', '2', '3', '-'),
+        ('0', '.', '(', ')'),
+        ('+', 'sin', 'cos', 'tan'),
+        ('pi', 'e', '^', 'sqrt'),
+        ('C', '=', 'log', 'clear')
+    ]
+
+    # Crear botones en la interfaz
+    for i, row in enumerate(buttons):
+        for j, btn_text in enumerate(row):
+            if btn_text == 'C':
+                button = ctk.CTkButton(calculadora_frame, text=btn_text, width=60, command=clear_entry)
+            elif btn_text == '=':
+                button = ctk.CTkButton(calculadora_frame, text=btn_text, width=60, command=evaluate_expression)
+            elif btn_text == 'clear':
+                button = ctk.CTkButton(calculadora_frame, text="Clear", width=60, command=clear_entry)
+            else:
+                button = ctk.CTkButton(calculadora_frame, text=btn_text, width=60, command=lambda t=btn_text: insert_text(t))
+            button.grid(row=i+1, column=j, padx=5, pady=5)
+
+# Función para crear la interfaz de graficador
+def crear_interfaz_graficador(tabview):
+    # Crear pestaña para el graficador en el tabview
+    tab_graficador = tabview.add("Graficador")
+
+    # Etiqueta y entrada para la función
+    label_funcion = ctk.CTkLabel(tab_graficador, text="Función f(x):", font=("Arial", 14, "bold"))
+    label_funcion.pack(pady=5)
+    funcion_input = ctk.CTkEntry(tab_graficador, font=("Arial", 12), width=200)
+    funcion_input.pack(pady=5)
+    # Contenedor para los rangos de x
+    rango_frame = ctk.CTkFrame(tab_graficador)
+    rango_frame.pack(pady=5)
+
+    # Etiqueta y entrada para el rango mínimo de x
+    label_x_min = ctk.CTkLabel(rango_frame, text="Rango mínimo (x_min):", font=("Arial", 14, "bold"))
+    label_x_min.grid(row=0, column=0, padx=5)
+    x_min_input = ctk.CTkEntry(rango_frame, font=("Arial", 12), width=100)
+    x_min_input.grid(row=0, column=1, padx=5)
+
+    # Etiqueta y entrada para el rango máximo de x
+    label_x_max = ctk.CTkLabel(rango_frame, text="Rango máximo (x_max):", font=("Arial", 14, "bold"))
+    label_x_max.grid(row=0, column=2, padx=5)
+    x_max_input = ctk.CTkEntry(rango_frame, font=("Arial", 12), width=100)
+    x_max_input.grid(row=0, column=3, padx=5)
+    # Contenedor para los rangos de y
+    rango_frame_y = ctk.CTkFrame(tab_graficador)
+    rango_frame_y.pack(pady=5)
+
+    # Etiqueta y entrada para el rango mínimo de y
+    label_y_min = ctk.CTkLabel(rango_frame_y, text="Rango mínimo (y_min):", font=("Arial", 14, "bold"))
+    label_y_min.grid(row=0, column=0, padx=5)
+    y_min_input = ctk.CTkEntry(rango_frame_y, font=("Arial", 12), width=100)
+    y_min_input.grid(row=0, column=1, padx=5)
+
+    # Etiqueta y entrada para el rango máximo de y
+    label_y_max = ctk.CTkLabel(rango_frame_y, text="Rango máximo (y_max):", font=("Arial", 14, "bold"))
+    label_y_max.grid(row=0, column=2, padx=5)
+    y_max_input = ctk.CTkEntry(rango_frame_y, font=("Arial", 12), width=100)
+    y_max_input.grid(row=0, column=3, padx=5)
+
+
+    # Función para procesar la función ingresada y graficarla
+    def graficar():
+        try:
+            # Obtener y procesar los valores ingresados
+            funcion_str = funcion_input.get()
+
+            if(x_min_input.get() != ''):
+                 x_min = float(y_min_input.get()) 
+            else: x_min = -10
+            if(x_max_input.get() != ''):
+                 x_max = float(y_max_input.get()) 
+            else: x_max = 10
+            if(y_min_input.get() != ''):
+                 y_min = float(y_min_input.get()) 
+            else: y_min = -10
+            if(y_max_input.get() != ''):
+                 y_max = float(y_max_input.get()) 
+            else: y_max = 10
+
+            # Definir la función evaluable
+            def funcion(x):
+                return eval(funcion_str, {"x": x, "np": np, "math": math, "sin": math.sin, "cos": math.cos, "tan": math.tan, "log": math.log, "sqrt": math.sqrt, "pi": math.pi, "e": math.e})
+
+            # Llamar al módulo graficador
+            graficar_funcion(funcion, x_min=x_min, x_max=x_max,y_min= y_min, y_max= y_max, titulo=f"Gráfica de f(x) = {funcion_str}")
+
+        except Exception as e:
+            print(f"Error al graficar: {e}")
+
+    # Botón para graficar
+    btn_graficar = ctk.CTkButton(tab_graficador, text="Graficar", command=graficar, font=("Arial", 12, "bold"))
+    btn_graficar.pack(pady=10)
 # Crear la ventana principal y el menú de pestañas
 def main():
     root = ctk.CTk()
@@ -170,6 +323,8 @@ def main():
 
     crear_interfaz_biseccion(tabview)
     crear_interfaz_newton(tabview)
+    crear_interfaz_calculadora(tabview)
+    crear_interfaz_graficador(tabview)
 
     root.mainloop()
 
