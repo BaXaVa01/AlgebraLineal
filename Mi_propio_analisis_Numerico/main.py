@@ -8,6 +8,10 @@ from math import sin, cos, tan, log, sqrt, pi, e
 import re
 import numpy as np
 from plotter import graficar_funcion
+from sympy import sympify, latex, symbols
+from PIL import Image, ImageTk
+import io
+import matplotlib.pyplot as plt
 
 from PIL import Image, ImageTk
 
@@ -200,6 +204,56 @@ def crear_interfaz_introductoria(tabview):
     label_instrucciones.pack(pady=20, padx=20)
 
 
+# Función para actualizar la vista previa de la expresión en formato agradable
+def actualizar_preview():
+    global entry_text, preview_label
+    try:
+        # Crear una copia de entry_text para aplicar las transformaciones necesarias
+        expression_to_evaluate = entry_text.replace("^", "**")
+        expression_to_evaluate = re.sub(r'(\d)([a-zA-Z\(])', r'\1*\2', expression_to_evaluate)
+
+        # Convertir la expresión a SymPy y luego a LaTeX
+        x = symbols("x")
+        sympy_expr = sympify(expression_to_evaluate)
+        latex_expr = latex(sympy_expr)
+
+        # Crear una imagen de la expresión en formato LaTeX
+        buf = io.BytesIO()
+        plt.figure(figsize=(4, 1))
+        plt.text(0.5, 0.5, f"${latex_expr}$", size=20, ha="center", va="center")
+        plt.axis("off")
+        plt.savefig(buf, format="png", bbox_inches="tight", pad_inches=0.1)
+        buf.seek(0)
+
+        # Cargar la imagen en Tkinter
+        img = Image.open(buf)
+        img_tk = ImageTk.PhotoImage(img)
+        preview_label.config(image=img_tk)
+        preview_label.image = img_tk  # Mantener referencia de la imagen para evitar garbage collection
+    except Exception as e:
+        preview_label.config(text="Error en la expresión")
+
+# Función para evaluar la expresión en la entrada
+def evaluate_expression():
+    global entry_text
+    try:
+        # Evaluar la expresión, con transformaciones para interpretarla correctamente
+        expression_to_evaluate = entry_text.replace("^", "**")
+        expression_to_evaluate = re.sub(r'(\d)([a-zA-Z\(])', r'\1*\2', expression_to_evaluate)
+
+        # Evaluar la expresión
+        result = eval(expression_to_evaluate, {"__builtins__": None}, {
+            "sin": sin, "cos": cos, "tan": tan, "log": log, "sqrt": sqrt, "pi": pi, "e": e
+        })
+
+        # Mostrar el resultado en la entrada
+        entry.delete(0, ctk.END)
+        entry.insert(0, str(result))
+        entry_text = str(result)
+    except Exception:
+        entry.delete(0, ctk.END)
+        entry.insert(0, "Error")
+        entry_text = ""
 
 
 def crear_interfaz_calculadora(tabview):
@@ -219,40 +273,47 @@ def crear_interfaz_calculadora(tabview):
     entry = ctk.CTkEntry(calculadora_frame, width=300, font=("Arial", 20))
     entry.grid(row=0, column=0, columnspan=4, pady=10, padx=10)
 
+
     # Función para insertar texto en la entrada
+        # def insert_text(text):
+        #     global entry_text
+        #     entry_text += text
+        #     entry.delete(0, ctk.END)
+        #     entry.insert(0, entry_text)
+
     def insert_text(text):
         global entry_text
-        entry_text += text
-        entry.delete(0, ctk.END)
-        entry.insert(0, entry_text)
+        cursor_position = entry.index(ctk.INSERT)  # Obtener la posición actual del cursor
+        entry.insert(cursor_position, text)        # Insertar texto en esa posición
+        entry_text = entry.get() 
 
-    # Función para evaluar la expresión en la entrada
-    def evaluate_expression():
-        global entry_text
-        try:
-            # Crear una copia de entry_text para evaluar, realizando los reemplazos necesarios
-            expression_to_evaluate = entry_text
+    # # Función para evaluar la expresión en la entrada
+    # def evaluate_expression():
+    #     global entry_text
+    #     try:
+    #         # Crear una copia de entry_text para evaluar, realizando los reemplazos necesarios
+    #         expression_to_evaluate = entry_text
 
-            # Reemplazar ^ con ** para la potencia
-            expression_to_evaluate = expression_to_evaluate.replace("^", "**")
+    #         # Reemplazar ^ con ** para la potencia
+    #         expression_to_evaluate = expression_to_evaluate.replace("^", "**")
             
-            # Insertar * entre un número y una variable o función (por ejemplo, 2x -> 2*x)
-            expression_to_evaluate = re.sub(r'(\d)([a-zA-Z\(])', r'\1*\2', expression_to_evaluate)
+    #         # Insertar * entre un número y una variable o función (por ejemplo, 2x -> 2*x)
+    #         expression_to_evaluate = re.sub(r'(\d)([a-zA-Z\(])', r'\1*\2', expression_to_evaluate)
             
-            # Evaluar la expresión
-            result = eval(expression_to_evaluate, {"__builtins__": None}, {
-                "sin": sin, "cos": cos, "tan": tan, "log": log, "sqrt": sqrt, "pi": pi, "e": e
-            })
+    #         # Evaluar la expresión
+    #         result = eval(expression_to_evaluate, {"__builtins__": None}, {
+    #             "sin": sin, "cos": cos, "tan": tan, "log": log, "sqrt": sqrt, "pi": pi, "e": e
+    #         })
 
-            # Mostrar el resultado en la entrada
-            entry.delete(0, ctk.END)
-            entry.insert(0, str(result))
-            entry_text = str(result)
-        except Exception:
-            # Mostrar error si la evaluación falla
-            entry.delete(0, ctk.END)
-            entry.insert(0, "Error")
-            entry_text = ""
+    #         # Mostrar el resultado en la entrada
+    #         entry.delete(0, ctk.END)
+    #         entry.insert(0, str(result))
+    #         entry_text = str(result)
+    #     except Exception:
+    #         # Mostrar error si la evaluación falla
+    #         entry.delete(0, ctk.END)
+    #         entry.insert(0, "Error")
+    #         entry_text = ""
 
 
     # Función para borrar la entrada
@@ -260,6 +321,15 @@ def crear_interfaz_calculadora(tabview):
         global entry_text
         entry_text = ""
         entry.delete(0, ctk.END)
+    
+       # Actualizar preview en tiempo real al escribir en el campo de entrada
+    def actualizar_texto(event):
+        global entry_text
+        entry_text = entry.get()
+        actualizar_preview()
+
+    entry.bind("<KeyRelease>", actualizar_texto)  # Actualizar preview en cada pulsación de tecla
+ 
 
     # Botones numéricos, operaciones y funciones
     buttons = [
@@ -269,6 +339,7 @@ def crear_interfaz_calculadora(tabview):
         ('0', '.', '(', ')'),
         ('+', 'sin', 'cos', 'tan'),
         ('pi', 'e', '^', 'sqrt'),
+        ('x', 'y', 'z', 'clear'),  # Nueva fila con las variables y el botón de limpiar
         ('C', '=', 'log', 'clear')
     ]
 
