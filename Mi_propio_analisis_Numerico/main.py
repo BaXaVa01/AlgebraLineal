@@ -35,27 +35,35 @@ def guardar_funcion_temp(funcion):
         print(f"Archivo temporal creado: {temp_file.name}")  # Agregar esta línea
         return temp_file.name
 
-# Generar el GIF para Bisección usando el archivo temporal
+# Modificar generar_gif_biseccion para mostrar la barra después de crear el GIF
 def generar_gif_biseccion():
     funcion = funcion_input_biseccion.get("1.0", "end-1c").strip()
     if not funcion:
         messagebox.showerror("Error", "Por favor, ingresa una función válida.")
         return
     temp_file = guardar_funcion_temp(funcion)  # Guardar la función en un archivo temporal
-    subprocess.run([
+    result = subprocess.run([
         "manim", "-pql", "animation.py", "BiseccionAnimation", "--format=gif", temp_file
     ])
+    
+    # Verificar si el GIF se generó correctamente
+    if result.returncode == 0:
+        crear_barra_extensible(tab_biseccion)  # Mostrar la barra en la pestaña de Bisección
 
-# Generar el GIF para Newton-Raphson usando el archivo temporal
+# Modificar generar_gif_newton para mostrar la barra después de crear el GIF
 def generar_gif_newton():
     funcion = funcion_input_newton.get("1.0", "end-1c").strip()
     if not funcion:
         messagebox.showerror("Error", "Por favor, ingresa una función válida.")
         return
     temp_file = guardar_funcion_temp(funcion)  # Guardar la función en un archivo temporal
-    subprocess.run([
+    result = subprocess.run([
         "manim", "-pql", "animation.py", "NewtonRaphsonAnimation", "--format=gif", temp_file
     ])
+    
+    # Verificar si el GIF se generó correctamente
+    if result.returncode == 0:
+        crear_barra_extensible(tab_newton)  # Mostrar la barra en la pestaña de Newton-Raphson
 
 
 # Función para ejecutar el método de Bisección desde la interfaz
@@ -132,10 +140,29 @@ def ejecutar_newton_raphson():
         consola_newton.delete("1.0", "end")
         consola_newton.insert("1.0", str(e))
 
+# Crear una función general para la barra extensible
+def crear_barra_extensible(tab):
+    # Crear un frame en el lado derecho de la pestaña
+    barra_frame = ctk.CTkFrame(tab, width=200)
+    barra_frame.pack(side="right", fill="y")
+    
+    # Etiqueta para indicar que el GIF se generó
+    label_gif_generado = ctk.CTkLabel(barra_frame, text="GIF generado:", font=("Arial", 14, "bold"))
+    label_gif_generado.pack(pady=10)
+    
+    # Agregar el contenido específico de la barra
+    # Aquí puedes añadir más elementos, como botones, etiquetas, etc.
+    # Ejemplo de un botón para ver el GIF generado
+    btn_ver_gif = ctk.CTkButton(barra_frame, text="Ver GIF", command=lambda: messagebox.showinfo("GIF", "Aquí se mostraría el GIF"))
+    btn_ver_gif.pack(pady=10)
+
+    # Puedes retornar el frame para realizar modificaciones si es necesario
+    return barra_frame
+
 # Crear la interfaz para el método de Bisección
 def crear_interfaz_biseccion(tabview):
     global funcion_input_biseccion, a_input, b_input, tol_input, max_iter_input, consola_biseccion, pasos_biseccion, tree, btn_mostrar_tabla
-
+    global tab_biseccion
     tab_biseccion = tabview.add("Bisección")
     label_funcion = ctk.CTkLabel(tab_biseccion, text="Función f(x):", font=("Arial", 14, "bold"))
     label_funcion.pack(pady=5)
@@ -188,7 +215,7 @@ def crear_interfaz_biseccion(tabview):
 # Crear la interfaz para el método de Newton-Raphson
 def crear_interfaz_newton(tabview):
     global funcion_input_newton, valor_inicial_input, consola_newton
-
+    global tab_newton
     tab_newton = tabview.add("Newton-Raphson")
     label_funcion = ctk.CTkLabel(tab_newton, text="Función f(x):", font=("Arial", 14, "bold"))
     label_funcion.pack(pady=5)
