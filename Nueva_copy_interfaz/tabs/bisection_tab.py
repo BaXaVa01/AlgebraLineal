@@ -145,7 +145,6 @@ class BisectionTab:
 
     def ejecutar_biseccion(self, boolean=False):
         try:
-            # Mostrar la sidebar
             self.sidebar.toggle_sidebar()
 
             # Obtener valores de entrada
@@ -155,32 +154,23 @@ class BisectionTab:
             tol = float(self.tol_entry.get())
             max_iter = int(self.max_iter_entry.get())
 
-            # Crear función evaluable utilizando sympy y numpy
             x = symbols("x")
-            try:
-                expr = sympify(funcion)  # Convierte la función a simbólica
-                f = lambdify(x, expr, "numpy")  # Función evaluable con numpy
-            except Exception as e:
-                raise ValueError(f"Error al procesar la función: {e}")
+            expr = sympify(funcion)
+            f = lambdify(x, expr, "numpy")
 
-            # Llamar al método de Bisección
             raiz, error, pasos, iteraciones = biseccion(f, a, b, tol, max_iter)
 
-            # Graficar la función en el widget
             self.graph_widget.plot_function(f, x_range=(a, b))
 
-            # Mostrar resultado en la tabla
             data = []
             for paso in pasos:
                 iteracion, xi, xu, xr, Ea, yi, yu, yr = paso.split(", ")
                 data.append([iteracion, xi, xu, xr, Ea, yi, yu, yr])
             self.table.insert_data(data)
 
-            # Guardar la operación en el archivo JSON
             variables = {"a": a, "b": b, "tol": tol, "max_iter": max_iter}
             guardar_input_operacion("biseccion", funcion, variables, raiz)
 
-            # Generar el GIF y mostrarlo en la sidebar
             indice = obtener_ultimo_indice(JSON_PATH, "biseccion")
 
             def mostrar_gif_en_sidebar(gif_path):
@@ -189,7 +179,8 @@ class BisectionTab:
                 else:
                     messagebox.showerror("Error", "No se pudo generar el GIF.")
 
-            generar_gif_desde_json("biseccion", indice, callback=mostrar_gif_en_sidebar)
+            # Pasar el content_frame de la sidebar como target para la barra de progreso
+            generar_gif_desde_json("biseccion", indice, gif_frame=self.sidebar.scrollable_gif_frame, callback=mostrar_gif_en_sidebar)
 
         except ValueError as ve:
             self.table.clear_data()
@@ -197,5 +188,6 @@ class BisectionTab:
         except Exception as e:
             self.table.clear_data()
             messagebox.showerror("Error", str(e))
+
 
 

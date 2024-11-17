@@ -163,7 +163,7 @@ class NewtonRaphsonTab:
                 else:
                     messagebox.showerror("Error", "No se pudo generar el GIF.")
 
-            generar_gif_desde_json("newton_raphson", indice, callback=mostrar_gif_en_sidebar)
+            generar_gif_desde_json("newton_raphson", indice,gif_frame=self.sidebar.scrollable_gif_frame, callback=mostrar_gif_en_sidebar)
 
         except ValueError as ve:
             self.table.clear_data()
