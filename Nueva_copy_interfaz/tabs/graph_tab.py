@@ -1,10 +1,7 @@
 import customtkinter as ctk
 from components.graph_widget import GraphWidget
-import numpy as np
 from tkinter import messagebox
-import math
 from sympy import sympify, symbols, lambdify
-import sympy as sp
 
 class GraphTab:
     def __init__(self, tabview):

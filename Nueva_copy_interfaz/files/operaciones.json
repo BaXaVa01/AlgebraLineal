@@ -2,42 +2,6 @@
     "newton_raphson": {
         "funciones": [
             {
-                "funcion": "x**2",
-                "variables": {
-                    "x0": 2.0,
-                    "tol": 0.0001,
-                    "max_iter": 40
-                },
-                "resultado": 6.103515625e-05
-            },
-            {
-                "funcion": "x**2",
-                "variables": {
-                    "x0": 2.0,
-                    "tol": 0.001,
-                    "max_iter": 30
-                },
-                "resultado": 0.0009765625
-            },
-            {
-                "funcion": "x**2",
-                "variables": {
-                    "x0": 2.0,
-                    "tol": 1e-06,
-                    "max_iter": 60
-                },
-                "resultado": 9.5367431640625e-07
-            },
-            {
-                "funcion": "sin(2*x)+cos(x)",
-                "variables": {
-                    "x0": 2.5,
-                    "tol": 1e-06,
-                    "max_iter": 50
-                },
-                "resultado": -42.411500823462205
-            },
-            {
                 "funcion": "sin(2*x)+cos(x)",
                 "variables": {
                     "x0": 2.5,
@@ -51,86 +15,6 @@
     "biseccion": {
         "funciones": [
             {
-                "funcion": "x*2",
-                "variables": {
-                    "a": -7.0,
-                    "b": 3.0,
-                    "tol": 0.0001,
-                    "max_iter": 30
-                },
-                "resultado": -3.0517578125e-05
-            },
-            {
-                "funcion": "x*2",
-                "variables": {
-                    "a": -7.0,
-                    "b": 3.0,
-                    "tol": 0.0001,
-                    "max_iter": 30
-                },
-                "resultado": -3.0517578125e-05
-            },
-            {
-                "funcion": "x*2",
-                "variables": {
-                    "a": -7.0,
-                    "b": 3.0,
-                    "tol": 0.0001,
-                    "max_iter": 30
-                },
-                "resultado": -3.0517578125e-05
-            },
-            {
-                "funcion": "sin(2*x)+cos(x)",
-                "variables": {
-                    "a": -50.0,
-                    "b": 40.0,
-                    "tol": 1e-06,
-                    "max_iter": 40
-                },
-                "resultado": 7.853981107473373
-            },
-            {
-                "funcion": "sin(2*x)+cos(x)",
-                "variables": {
-                    "a": -50.0,
-                    "b": -45.0,
-                    "tol": 1e-05,
-                    "max_iter": 40
-                },
-                "resultado": -48.69466781616211
-            },
-            {
-                "funcion": "sin(2*x)+cos(x)",
-                "variables": {
-                    "a": -50.0,
-                    "b": -45.0,
-                    "tol": 1e-05,
-                    "max_iter": 40
-                },
-                "resultado": -48.69466781616211
-            },
-            {
-                "funcion": "sin(2*x)+cos(x)",
-                "variables": {
-                    "a": -50.0,
-                    "b": -39.0,
-                    "tol": 1e-05,
-                    "max_iter": 40
-                },
-                "resultado": -42.41149425506592
-            },
-            {
-                "funcion": "sin(2*x)+cos(x)",
-                "variables": {
-                    "a": -50.0,
-                    "b": -39.0,
-                    "tol": 1e-05,
-                    "max_iter": 40
-                },
-                "resultado": -42.41149425506592
-            },
-            {
                 "funcion": "sin(2*x)+cos(x)",
                 "variables": {
                     "a": 0.0,
@@ -139,6 +23,86 @@
                     "max_iter": 30
                 },
                 "resultado": 1.5708045959472656
+            },
+            {
+                "funcion": "x*2",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 30
+                },
+                "resultado": -6.103515625e-05
+            },
+            {
+                "funcion": "x*2",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 30
+                },
+                "resultado": -6.103515625e-05
+            },
+            {
+                "funcion": "x*2",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 39
+                },
+                "resultado": -6.103515625e-05
+            },
+            {
+                "funcion": "x*2",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 30
+                },
+                "resultado": -6.103515625e-05
+            },
+            {
+                "funcion": "x*2",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 30
+                },
+                "resultado": -6.103515625e-05
+            },
+            {
+                "funcion": "x*2",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 30
+                },
+                "resultado": -6.103515625e-05
+            },
+            {
+                "funcion": "x*2",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 1e-05,
+                    "max_iter": 30
+                },
+                "resultado": -3.814697265625e-06
+            },
+            {
+                "funcion": "sin(x)**2-0.5",
+                "variables": {
+                    "a": 1.0,
+                    "b": 3.0,
+                    "tol": 0.0001,
+                    "max_iter": 30
+                },
+                "resultado": 2.3560791015625
             }
         ]
     }

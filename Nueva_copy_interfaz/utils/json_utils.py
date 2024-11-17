@@ -6,6 +6,18 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSON_PATH = os.path.join(BASE_DIR, "files", "operaciones.json")
 
+def obtener_ultimo_indice(json_path, metodo):
+    """Obtiene el índice del último elemento para un método específico en el JSON."""
+    try:
+        with open(json_path, "r") as file:
+            data = json.load(file)
+            if metodo in data and "funciones" in data[metodo]:
+                return len(data[metodo]["funciones"]) - 1  # Último índice
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+    return -1  # Si no existe el método o el JSON está vacío
+
+
 def guardar_input_operacion(metodo, funcion, variables, resultado):
     """
     Guarda una nueva operación en el archivo JSON.
@@ -71,4 +83,42 @@ def cargar_datos():
     except Exception as e:
         print(f"Error inesperado al cargar datos: {e}")
         return {}
+
+def eliminar_operaciones(metodo, indices):
+    """
+    Elimina operaciones específicas de un método en el archivo JSON.
+    
+    - metodo: Nombre del método (e.g., "biseccion", "newton_raphson").
+    - indices: Lista de índices a eliminar.
+    """
+    try:
+        if not os.path.exists(JSON_PATH):
+            raise FileNotFoundError("El archivo JSON no existe.")
+
+        # Cargar datos actuales
+        with open(JSON_PATH, "r") as file:
+            data = json.load(file)
+
+        if metodo not in data or "funciones" not in data[metodo]:
+            raise ValueError(f"No se encontraron operaciones para el método: {metodo}")
+
+        # Ordenar los índices en orden descendente para evitar problemas al eliminar
+        indices = sorted(indices, reverse=True)
+
+        # Eliminar las operaciones correspondientes
+        for i in indices:
+            del data[metodo]["funciones"][i]
+
+        # Si no quedan funciones para el método, eliminar la clave del método
+        if not data[metodo]["funciones"]:
+            del data[metodo]
+
+        # Guardar los cambios
+        with open(JSON_PATH, "w") as file:
+            json.dump(data, file, indent=4)
+
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+    except Exception as e:
+        print(f"Error inesperado: {e}")
 

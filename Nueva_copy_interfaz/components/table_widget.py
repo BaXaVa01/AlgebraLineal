@@ -7,14 +7,28 @@ class CTkTable(ctk.CTkFrame):
     def __init__(self, master, columns, advanced_features=False, **kwargs):
         super().__init__(master, **kwargs)
 
+        # Contenedor para la tabla y la barra de desplazamiento
+        self.container = ctk.CTkFrame(self)
+        self.container.pack(fill="both", expand=True)
+
         # Configuración de Treeview para la tabla básica
-        self.tree = ttk.Treeview(self, columns=columns, show="headings")
-        self.tree.pack(fill="both", expand=True, padx=10, pady=10)
+        self.tree = ttk.Treeview(self.container, columns=columns, show="headings")
+        self.tree.pack(side="left", fill="both", expand=True)
+
+        # Barra de desplazamiento vertical
+        self.scrollbar_y = ttk.Scrollbar(self.container, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=self.scrollbar_y.set)
+        self.scrollbar_y.pack(side="right", fill="y")
+
+        # Barra de desplazamiento horizontal
+        self.scrollbar_x = ttk.Scrollbar(self, orient="horizontal", command=self.tree.xview)
+        self.tree.configure(xscrollcommand=self.scrollbar_x.set)
+        self.scrollbar_x.pack(side="bottom", fill="x")
 
         # Configuración de las columnas
         for col in columns:
             self.tree.heading(col, text=col)
-            self.tree.column(col, anchor="center")
+            self.tree.column(col, anchor="center", width=100)  # Ancho inicial estándar
 
         # Estilos adicionales de ttk para adaptar a CustomTkinter
         style = ttk.Style()
@@ -31,7 +45,6 @@ class CTkTable(ctk.CTkFrame):
             self.text_color = kwargs.get('text_color', "white")
             self.fg_color = kwargs.get('fg_color', "#333333")
             self.wraplength = kwargs.get('wraplength', 500)
-            # Aquí puedes inicializar más funcionalidades avanzadas según tus necesidades
 
     def insert_data(self, data):
         """Inserta datos en la tabla."""
@@ -90,5 +103,7 @@ class CTkTable(ctk.CTkFrame):
         """Añade una nueva columna a la tabla"""
         self.tree["columns"] += (column_name,)
         self.tree.heading(column_name, text=column_name)
-        self.tree.column(column_name, anchor="center")
+        self.tree.column(column_name, anchor="center", width=100)  # Ancho inicial para la nueva columna
+
+
 

@@ -1,44 +1,113 @@
-# components/sidebar.py
+# sidebar.py
 import customtkinter as ctk
+import os
+from components.gif_widget import GIFWidget
 
-class Sidebar(ctk.CTkFrame):
-    def __init__(self, master, title="Opciones", width=250, **kwargs):
-        super().__init__(master, width=width, **kwargs)
-        self.width_closed = 50  # Ancho cuando está retraída
-        self.width_expanded = width  # Ancho cuando está expandida
-        self.is_expanded = False  # Estado inicial de la sidebar (retraída)
 
-        # Configuración de apariencia y título de la sidebar
-        self.config(border_width=1, corner_radius=8)
-        self.pack_propagate(False)
-        
+class FloatingSidebar(ctk.CTkFrame):
+    def __init__(self, master, title="Opciones", width=250, height=150, from_right=True, **kwargs):
+        super().__init__(master, **kwargs)
+        self.master = master
+        self.default_width = width
+        self.height = height
+        self.from_right = from_right
+        self.is_expanded = False  # Estado inicial (retraída)
+
+        # Configuración inicial de apariencia
+        self.configure(border_width=1, corner_radius=12, fg_color="gray20")
+        self.place(x=self.master.winfo_width(), y=0, relheight=1)
+
         # Botón para expandir/retraer la sidebar
-        self.toggle_button = ctk.CTkButton(self, text=">", width=self.width_closed, command=self.toggle_sidebar)
-        self.toggle_button.pack(side="top", pady=5)
+        self.toggle_button = ctk.CTkButton(self.master, text="☰", width=40, command=self.toggle_sidebar, fg_color="gray25")
+        self.toggle_button.place(x=self.master.winfo_width() - 50, y=10)
 
-        # Contenedor de contenido de la sidebar
-        self.content_frame = ctk.CTkFrame(self, width=self.width_expanded - 20)
-        self.content_frame.pack(side="top", fill="both", expand=True)
-        self.content_frame.pack_forget()  # Ocultar el contenido al iniciar
+        # Contenido de la sidebar
+        self.content_frame = ctk.CTkFrame(self, fg_color="gray15", corner_radius=8)
+        self.content_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Título de la barra lateral
-        self.title_label = ctk.CTkLabel(self.content_frame, text=title, font=("Arial", 14, "bold"))
-        self.title_label.pack(pady=10)
+        # Título de la sidebar
+        self.title_label = ctk.CTkLabel(self.content_frame, text=title, font=("Arial", 16, "bold"), text_color="white")
+        self.title_label.pack(pady=15)
+
+        # Espacio para los GIFs
+        self.gif_frame = ctk.CTkFrame(self.content_frame, fg_color="gray10", corner_radius=8)
+        self.gif_frame.pack(fill="both", expand=True, pady=10)
+
+        # Botón para cerrar la sidebar
+        self.close_button = ctk.CTkButton(self.content_frame, text="Cerrar", command=self.toggle_sidebar, fg_color="red")
+        self.close_button.pack(side="bottom", pady=10)
+
+        # Vincular eventos de redimensionamiento
+        self.master.bind("<Configure>", self.update_position)
 
     def toggle_sidebar(self):
-        """Expande o retrae la sidebar y ajusta su contenido."""
-        if self.is_expanded:
-            # Contraer la sidebar
-            self.configure(width=self.width_closed)
-            self.toggle_button.configure(text=">")
-            self.content_frame.pack_forget()
-        else:
-            # Expandir la sidebar
-            self.configure(width=self.width_expanded)
-            self.toggle_button.configure(text="<")
-            self.content_frame.pack(fill="both", expand=True)
-        self.is_expanded = not self.is_expanded
+        """Controla la animación para expandir o retraer la sidebar."""
+        current_width = self.winfo_width() if self.is_expanded else self.default_width
+        target_x = self.master.winfo_width() if self.is_expanded else self.master.winfo_width() - current_width
 
-    def add_widget(self, widget, **kwargs):
-        """Agrega un widget al contenido de la sidebar."""
-        widget.pack(in_=self.content_frame, **kwargs)
+        self.animate(target_x)
+        self.is_expanded = not self.is_expanded
+        self.toggle_button.configure(text="☰" if not self.is_expanded else "×")
+
+    def animate(self, target_x):
+        """Realiza la animación suave para mover la sidebar."""
+        current_x = self.winfo_x()
+        step = 10 if target_x > current_x else -10  # Dirección de la animación
+
+        if abs(target_x - current_x) > abs(step):
+            self.place(x=current_x + step, y=0)
+            self.master.after(10, lambda: self.animate(target_x))
+        else:
+            self.place(x=target_x, y=0)  # Posiciona la sidebar en el destino final
+
+    def update_position(self, event=None):
+        """
+        Mantiene la posición del botón y la sidebar sincronizados con la ventana principal,
+        respetando el estado actual de expansión.
+        """
+        # Mantener el botón de toggle visible
+        button_x = max(0, self.master.winfo_width() - 50)
+        self.toggle_button.place(x=button_x, y=10)
+
+        # Ajustar la posición de la sidebar según su estado
+        if self.is_expanded:
+            self.place(x=self.master.winfo_width() - self.default_width, y=0, relheight=1)
+        else:
+            self.place(x=self.master.winfo_width(), y=0, relheight=1)
+
+    def show_single_gif(self, gif_path):
+        """
+        Muestra un único GIF en la sidebar.
+        - gif_path: Ruta al archivo GIF a mostrar.
+        """
+        self.clear_gif_frame()
+        if os.path.isfile(gif_path) and gif_path.lower().endswith(".gif"):
+            gif_widget = GIFWidget(self.gif_frame, gif_paths=[gif_path], width=200, height=200)
+            gif_widget.pack(fill="both", expand=True)
+
+    def clear_gif_frame(self):
+        """Limpia el contenido de la sección de GIFs en la sidebar."""
+        for widget in self.gif_frame.winfo_children():
+            widget.destroy()
+
+    def show_gifs(self, horizontal):
+        """Carga y muestra GIFs desde el directorio `files/gifs`."""
+        # Ruta base para los GIFs
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        gifs_dir = os.path.join(BASE_DIR, "files", "gifs")
+
+        # Verificar si el directorio existe y tiene GIFs
+        if not os.path.exists(gifs_dir):
+            print(f"Directorio no encontrado: {gifs_dir}")
+            return
+        gif_files = [os.path.join(gifs_dir, f) for f in os.listdir(gifs_dir) if f.lower().endswith(".gif")]
+
+        if not gif_files:
+            print(f"No se encontraron archivos GIF en: {gifs_dir}")
+            return
+
+        # Crear el widget GIF y cargar los GIFs
+        gif_widget = GIFWidget(self.gif_frame, width=200, height=200)
+        gif_widget.load_gifs(gif_files, horizontal=horizontal)
+        gif_widget.pack(fill="both", expand=True)
+

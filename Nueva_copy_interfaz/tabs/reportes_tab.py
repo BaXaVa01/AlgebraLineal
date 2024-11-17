@@ -1,7 +1,8 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from components.table_widget import CTkTable
-from utils.json_utils import cargar_datos
+from components.tooltip_widget import CTkToolTip
+from utils.json_utils import cargar_datos, eliminar_operaciones
 from utils.git_utils import generar_gif_desde_json
 import threading
 
@@ -25,6 +26,13 @@ class ReportesTab:
         self.btn_generar_gifs = ctk.CTkButton(self.tab, text="Generar GIFs Seleccionados", command=self.generar_gifs_seleccionados)
         self.btn_generar_gifs.pack(pady=10)
 
+        # Botón para eliminar filas seleccionadas
+        self.btn_eliminar = ctk.CTkButton(self.tab, text="🗑", width=50, command=self.eliminar_seleccionados)
+        self.btn_eliminar.pack(pady=10)
+
+        # Tooltip para el botón de eliminar
+        CTkToolTip(self.btn_eliminar, message="Elimina las filas seleccionadas de la tabla.", delay=500)
+
     def cargar_operaciones(self):
         try:
             # Cargar operaciones desde el archivo JSON
@@ -42,11 +50,7 @@ class ReportesTab:
             for metodo, contenido in self.operaciones.items():
                 if "funciones" in contenido and isinstance(contenido["funciones"], list):
                     for funcion in contenido["funciones"]:
-                        # Crear un BooleanVar para la selección
-                        var = ctk.BooleanVar(value=False)
-                        self.check_vars.append(var)
-
-                        # Insertar fila en la tabla con el estado inicial de "No seleccionado"
+                        # Insertar fila en la tabla
                         self.tabla.tree.insert(
                             "", "end",
                             values=(metodo, funcion["funcion"], "No seleccionado")
@@ -110,4 +114,55 @@ class ReportesTab:
             generar_gif_desde_json(metodo, indice)
         except Exception as e:
             messagebox.showerror("Error", f"Error en la generación del GIF: {e}")
+
+    def eliminar_seleccionados(self):
+        """
+        Elimina las filas seleccionadas de la tabla y del archivo JSON.
+        """
+        try:
+            seleccionados = []  # Lista para almacenar índices de operaciones a eliminar
+            filas_a_eliminar = []
+
+            # Recorrer todas las filas de la tabla
+            for item in self.tabla.tree.get_children():
+                values = self.tabla.tree.item(item, "values")
+                if values[2] == "Seleccionado":
+                    metodo = values[0]
+                    funcion = values[1]
+                    
+                    # Obtener el índice correspondiente en el JSON
+                    indice = next(
+                        (i for i, op in enumerate(self.operaciones[metodo]["funciones"]) if op["funcion"] == funcion),
+                        None
+                    )
+                    if indice is not None:
+                        seleccionados.append((metodo, indice))
+                        filas_a_eliminar.append(item)  # Marcar fila para eliminar
+
+            # Eliminar las filas seleccionadas de la tabla
+            for fila in filas_a_eliminar:
+                self.tabla.tree.delete(fila)
+
+            # Eliminar las operaciones seleccionadas del archivo JSON
+            for metodo, indices in self.agrupar_por_metodo(seleccionados).items():
+                eliminar_operaciones(metodo, indices)
+
+            messagebox.showinfo("Operación completada", "Operaciones eliminadas correctamente.")
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al eliminar operaciones: {e}")
+
+    def agrupar_por_metodo(self, seleccionados):
+        """
+        Agrupa los índices seleccionados por método.
+        - seleccionados: Lista de tuplas (metodo, indice).
+        Retorna un diccionario {metodo: [indices]}.
+        """
+        agrupados = {}
+        for metodo, indice in seleccionados:
+            if metodo not in agrupados:
+                agrupados[metodo] = []
+            agrupados[metodo].append(indice)
+        return agrupados
+
 
