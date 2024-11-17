@@ -125,7 +125,14 @@ class NewtonRaphsonTab:
                 raise ValueError(f"Error al procesar la función: {e}")
 
             # Llamar al método de Newton-Raphson
-            raiz, pasos = newton_raphson(f, f_prime, x0, tol, max_iter)
+            resultado = newton_raphson(funcion, x0, tol, max_iter)
+
+            # Verificar si el resultado tiene la estructura esperada
+            if not isinstance(resultado, dict) or "raiz" not in resultado or "iteraciones" not in resultado:
+                raise ValueError("La función 'newton_raphson' no devolvió el formato esperado.")
+
+            raiz = resultado["raiz"]
+            pasos = resultado["iteraciones"]
 
             # Graficar la función en el widget
             self.graph_widget.plot_function(f, x_range=(x0 - 5, x0 + 5))
@@ -133,8 +140,14 @@ class NewtonRaphsonTab:
             # Mostrar resultados en la tabla
             data = []
             for paso in pasos:
-                iteracion, xi, fi, f_prime_i, error = paso
+                iteracion = paso.get("iteracion", "N/A")
+                xi = paso.get("x", "N/A")
+                fi = paso.get("f(x)", "N/A")
+                f_prime_i = paso.get("f'(x)", "N/A")
+                error = paso.get("error", "N/A")
                 data.append([iteracion, xi, fi, f_prime_i, error])
+
+            # Insertar los datos en la tabla
             self.table.insert_data(data)
 
             # Guardar la operación en el archivo JSON
@@ -158,6 +171,7 @@ class NewtonRaphsonTab:
         except Exception as e:
             self.table.clear_data()
             messagebox.showerror("Error", str(e))
+
 
 
 
