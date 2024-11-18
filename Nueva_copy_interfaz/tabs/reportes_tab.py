@@ -5,11 +5,15 @@ from components.tooltip_widget import CTkToolTip
 from utils.json_utils import cargar_datos, eliminar_operaciones
 from utils.git_utils import generar_gif_desde_json
 from components.sidebar import FloatingSideBarUp
+from components.gif_widget import GIFWidget
+import os
 import threading
 
 class ReportesTab:
     def __init__(self, tabview):
-        self.tab = tabview.add("Reportes")
+        self.main = tabview.add("Reportes")
+        self.tab = ctk.CTkScrollableFrame(self.main)
+        self.tab.pack(fill="both", expand=True, padx=10, pady=10)
         
         # Inicializar la interfaz de usuario
         self.init_ui()
@@ -111,8 +115,8 @@ class ReportesTab:
 
     def generar_gif_thread(self, metodo, indice):
         try:
-            # Generar el GIF desde el JSON con la operación seleccionada
-            generar_gif_desde_json(metodo, indice)
+            # Llamar a generar_gif_desde_json con un callback para mostrar el GIF al terminar
+            generar_gif_desde_json(metodo, indice, self.tab, callback=self.add_gif_to_frame)
         except Exception as e:
             messagebox.showerror("Error", f"Error en la generación del GIF: {e}")
 
@@ -165,5 +169,14 @@ class ReportesTab:
                 agrupados[metodo] = []
             agrupados[metodo].append(indice)
         return agrupados
+    def add_gif_to_frame(self, gif_path):
+        """
+        Agrega un GIF al frame scrollable (self.tab).
+        - gif_path: Ruta al archivo GIF generado.
+        """
+        if gif_path and os.path.isfile(gif_path):
+            # Crear un GIFWidget para mostrar el GIF
+            gif_widget = GIFWidget(self.tab, gif_paths=[gif_path])
+            gif_widget.pack(padx=5, pady=5)  # Empaquetar el widget en el frame
 
 

@@ -18,7 +18,7 @@ def obtener_ultimo_indice(json_path, metodo):
     return -1  # Si no existe el método o el JSON está vacío
 
 
-def guardar_input_operacion(metodo, funcion, variables, resultado):
+def guardar_input_operacion(metodo, funcion, variables,resultado,fprime=""):
     """
     Guarda una nueva operación en el archivo JSON.
     - metodo: Nombre del método, como "biseccion" o "newton_raphson".
@@ -36,11 +36,19 @@ def guardar_input_operacion(metodo, funcion, variables, resultado):
             data = json.load(file)
 
     # Estructura de la nueva operación
-    nueva_operacion = {
+    if fprime=="":
+        nueva_operacion = {
         "funcion": funcion,
         "variables": variables,
         "resultado": resultado
-    }
+        }
+    else:
+        nueva_operacion = {
+            "funcion": funcion,
+            "variables": variables,
+            "dx":fprime,
+            "resultado": resultado
+        }
 
     # Agregar la operación al método correspondiente
     if metodo not in data:

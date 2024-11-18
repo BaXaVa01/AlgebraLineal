@@ -26,6 +26,9 @@ class BisectionTab:
         self.tab.grid_rowconfigure(0, weight=1)  # Expandir widgets verticalmente
         self.tab.grid_columnconfigure(0, weight=1)  # Panel izquierdo ocupa más espacio
         self.tab.grid_columnconfigure(1, weight=4)  # Panel derecho para consolas y graficador
+        self.resultado = None  # Inicializa el resultado
+        self.previous_artists = []  # Lista para almacenar artistas previamente graficados
+        self.current_step = 0  # Índice para controlar los pasos
 
         # Inicializar la interfaz de usuario
         self.init_ui()
@@ -113,6 +116,8 @@ class BisectionTab:
         # Tabla de resultados
         self.table = CTkTable(self.left_frame, columns=["Iteración", "a", "b", "c", "Error", "f(a)", "f(b)", "f(c)"])
         self.table.grid(row=12, column=0, pady=10, sticky="nsew", columnspan=2)
+        self.table.tree.bind("<<TreeviewSelect>>", self.on_row_select)
+
 
         # Configurar graficador en el panel derecho
         self.graph_widget = GraphWidget(self.right_frame)
@@ -121,8 +126,14 @@ class BisectionTab:
         # Configurar consolas en el panel derecho
         self.console_frame = ctk.CTkFrame(self.right_frame, fg_color="gray15", corner_radius=8)
         self.console_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
-        self.console_label = ctk.CTkLabel(self.console_frame, text="Consolas", font=("Arial", 14, "bold"))
-        self.console_label.pack(pady=5)
+        # Botón para iterar hacia atrás
+        btn_prev = ctk.CTkButton(self.console_frame, text="Anterior", command=self.plot_previous_step)
+        btn_prev.pack(side="left", padx=5, pady=5)
+
+        # Botón para iterar hacia adelante
+        btn_next = ctk.CTkButton(self.console_frame, text="Siguiente", command=self.plot_next_step)
+        btn_next.pack(side="right", padx=5, pady=5)
+
 
         # Sidebar para mostrar GIFs
         self.sidebar = FloatingSidebar(self.tab, title="Gifs Bisección", from_right=True, width=250, height=500)
@@ -188,6 +199,63 @@ class BisectionTab:
         except Exception as e:
             self.table.clear_data()
             messagebox.showerror("Error", str(e))
+
+    def plot_previous_step(self):
+        """Grafica los datos del paso anterior."""
+        if self.current_step > 0:
+            self.current_step -= 1
+            self.plot_step(self.current_step)
+
+    def plot_next_step(self):
+        """Grafica los datos del siguiente paso."""
+        if self.current_step < len(self.table.tree.get_children()) - 1:
+            self.current_step += 1
+            self.plot_step(self.current_step)
+    
+    def plot_step(self, step_index):
+        """Grafica los datos de la iteración especificada por step_index."""
+        # Eliminar artistas previos
+        for artist in self.previous_artists:
+            artist.remove()
+        self.previous_artists.clear()
+
+        # Obtener los datos de la fila seleccionada
+        row_data = self.table.get_row(step_index)
+        iteracion, a, b, c, Ea, f_a, f_b, f_c = map(float, row_data)
+
+        # Graficar puntos
+        point_a = self.graph_widget.ax.scatter([a], [f_a], color="blue", label=f"a: Iter {iteracion}")
+        point_b = self.graph_widget.ax.scatter([b], [f_b], color="red", label=f"b: Iter {iteracion}")
+        point_c = self.graph_widget.ax.scatter([c], [f_c], color="green", label=f"c: Iter {iteracion}")
+
+        # Añadir artistas a la lista
+        self.previous_artists.extend([point_a, point_b, point_c])
+
+        # Configurar ejes
+        self.graph_widget.ax.relim()
+        self.graph_widget.ax.autoscale_view()
+
+        # Actualizar etiquetas y leyenda
+        self.graph_widget.ax.set_xlabel("x")
+        self.graph_widget.ax.set_ylabel("f(x)")
+        self.graph_widget.ax.legend()
+
+        # Actualizar el gráfico
+        self.graph_widget.canvas.draw()
+
+        
+
+    def on_row_select(self, event):
+        """
+        Maneja la selección de una fila en la tabla y grafica el paso correspondiente.
+        """
+        selected_item = self.table.tree.selection()  # Obtiene el ID de la fila seleccionada
+        if selected_item:
+            # Obtén el índice de la fila seleccionada
+            index = self.table.tree.index(selected_item[0])
+            self.plot_step(index)
+
+
 
 
 

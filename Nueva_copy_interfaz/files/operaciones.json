@@ -2,58 +2,24 @@
     "newton_raphson": {
         "funciones": [
             {
+                "funcion": "x^2 - 3",
+                "variables": {
+                    "x0": 0.5,
+                    "tol": 1e-05,
+                    "max_iter": 1000
+                },
+                "dx": "x",
+                "resultado": 1.7320508075688774
+            },
+            {
                 "funcion": "sin(x*2)+cos(x)",
                 "variables": {
                     "x0": 2.5,
-                    "tol": 1e-05,
-                    "max_iter": 30
-                },
-                "resultado": -42.411500823462205
-            },
-            {
-                "funcion": "sin(2*x)+cos(x)",
-                "variables": {
-                    "x0": 2.5,
-                    "tol": 1e-05,
-                    "max_iter": 30
-                },
-                "resultado": -42.411500823462205
-            },
-            {
-                "funcion": "sin(2*x) - cos(x)",
-                "variables": {
-                    "x0": 2.5,
                     "tol": 0.0001,
                     "max_iter": 1000
                 },
-                "resultado": 2.6179938779914966
-            },
-            {
-                "funcion": "sin(2*x) + cos(x)",
-                "variables": {
-                    "x0": 2.5,
-                    "tol": 0.0001,
-                    "max_iter": 1000
-                },
+                "dx": "<function _lambdifygenerated at 0x000001D162F1A0C0>",
                 "resultado": -42.411500823462205
-            },
-            {
-                "funcion": "x^2 - 3",
-                "variables": {
-                    "x0": 0.5,
-                    "tol": 1e-05,
-                    "max_iter": 1000
-                },
-                "resultado": 1.7320508075688774
-            },
-            {
-                "funcion": "x^2 - 3",
-                "variables": {
-                    "x0": 0.5,
-                    "tol": 0.0001,
-                    "max_iter": 1000
-                },
-                "resultado": 1.7320508075688774
             }
         ]
     },
@@ -78,6 +44,26 @@
                     "max_iter": 1000
                 },
                 "resultado": 0.5235595703125
+            },
+            {
+                "funcion": "2*x",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": -6.103515625e-05
+            },
+            {
+                "funcion": "x*2",
+                "variables": {
+                    "a": -1.0,
+                    "b": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 100
+                },
+                "resultado": -6.103515625e-05
             }
         ]
     }
