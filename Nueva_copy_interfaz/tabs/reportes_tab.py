@@ -4,6 +4,7 @@ from components.table_widget import CTkTable
 from components.tooltip_widget import CTkToolTip
 from utils.json_utils import cargar_datos, eliminar_operaciones
 from utils.git_utils import generar_gif_desde_json
+from components.sidebar import FloatingSideBarUp
 import threading
 
 class ReportesTab:

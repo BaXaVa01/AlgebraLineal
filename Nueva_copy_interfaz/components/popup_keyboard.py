@@ -1,72 +1,85 @@
-# components/popup_keyboard.py
-import customtkinter as ctk
-from tkinter import Toplevel
+from tkinter import *
+from customtkinter import *
 import sys
 
-class PopupKeyboard(Toplevel):
-    def __init__(self, attach_widget, **kwargs):
-        super().__init__(**kwargs)
-        self.attach_widget = attach_widget
-        self.overrideredirect(True)
-        self.withdraw()  # Ocultar hasta que se necesite
-
-        # Configurar apariencia en función del sistema operativo
+class MathKeyboard(CTkToplevel):
+    
+    def __init__(self, attach, x=None, y=None, key_color=None,
+                 text_color=None, hover_color=None, fg_color=None,
+                 keywidth: int = 5, keyheight: int = 2, command=None,
+                 alpha: float = 0.85, corner=20, **kwargs):
+        
+        super().__init__(takefocus=0)
+        
+        self.focus()
+        self.corner = corner
+        self.disable = True
+        
         if sys.platform.startswith("win"):
-            self.transparent_color = self._apply_appearance_mode("#333333")
+            self.overrideredirect(True)
+            self.transparent_color = '#333333'
             self.attributes("-transparentcolor", self.transparent_color)
         elif sys.platform.startswith("darwin"):
-            self.attributes("-transparent", True)
+            self.overrideredirect(True)
             self.transparent_color = 'systemTransparent'
+            self.attributes("-transparent", True)
         else:
-            self.transparent_color = "#333333"
+            self.attributes("-type", "splash")
+            self.transparent_color = '#000001'
+            self.corner = 0
+            self.withdraw()
+            
+        self.disable = False
+        self.fg_color = "#2a2d2e" if fg_color is None else fg_color
+        self.frame = CTkFrame(self, bg_color=self.transparent_color, fg_color=self.fg_color, corner_radius=self.corner, border_width=2)
+        self.frame.pack(expand=True, fill="both")
+        
+        self.attach = attach
+        self.keywidth = keywidth
+        self.keyheight = keyheight
+        self.keycolor = key_color if key_color else "#444444"
+        self.textcolor = text_color if text_color else "#FFFFFF"
+        self.hovercolor = hover_color if hover_color else "#555555"
+        self.command = command
+        self.resizable(width=False, height=False)
+        self.transient(self.master)
 
-        # Configuración de diseño y estilo
-        self.bg_frame = ctk.CTkFrame(self, corner_radius=10)
-        self.bg_frame.pack(fill="both", expand=True)
-
-        # Definición de teclas para funciones matemáticas
         self.keys = [
-            ['7', '8', '9', '/', '(', ')', 'π'],
-            ['4', '5', '6', '*', 'sin', 'cos', 'tan'],
-            ['1', '2', '3', '-', 'log', 'ln', 'sqrt'],
-            ['0', '.', '^', '+', 'e', ',', '='],
-            ['Space', 'Clear', '←', 'Enter']
+            ['7', '8', '9', '/', 'π', 'e'],
+            ['4', '5', '6', '*', 'sin', 'cos'],
+            ['1', '2', '3', '-', 'tan', 'sqrt'],
+            ['0', '.', '^', '+', '(', ')'],
+            ['x', 'y', 'z', '=', 'Clear', 'Enter']
         ]
 
-        # Crear botones para cada tecla
-        for row_index, row in enumerate(self.keys):
-            for col_index, key in enumerate(row):
-                button = ctk.CTkButton(self.bg_frame, text=key, width=60, command=lambda k=key: self.on_key_press(k))
-                button.grid(row=row_index, column=col_index, padx=2, pady=2)
+        self._init_keys()
+        self.attributes('-alpha', alpha)
+        
+    def _init_keys(self):
+        """Crea las teclas del teclado matemático."""
+        for row_idx, row in enumerate(self.keys):
+            frame = CTkFrame(self.frame)
+            frame.pack(side=TOP, pady=5)
+            for key in row:
+                btn = CTkButton(frame, text=key, width=self.keywidth * 10 if key == 'Enter' else self.keywidth,
+                                height=self.keyheight, fg_color=self.keycolor, text_color=self.textcolor,
+                                hover_color=self.hovercolor, command=lambda k=key: self._on_key_press(k))
+                btn.pack(side=LEFT, padx=2)
 
-        # Vincular el evento de doble clic al widget de entrada para alternar el teclado
-        self.attach_widget.bind("<Double-Button-1>", self.toggle)
-
-    def on_key_press(self, key):
-        """Define las acciones para cada tecla del teclado."""
-        if key == '←':  # Borrar
-            self.attach_widget.delete(len(self.attach_widget.get()) - 1)
-        elif key == 'Clear':  # Limpiar entrada
-            self.attach_widget.delete(0, "end")
-        elif key == 'Space':  # Espacio
-            self.attach_widget.insert("insert", ' ')
-        elif key == 'Enter':  # Ocultar teclado
-            self.withdraw()
-        elif key == 'π':  # Insertar pi
-            self.attach_widget.insert("insert", 'pi')
-        elif key == 'e':  # Insertar e
-            self.attach_widget.insert("insert", 'e')
-        elif key in {'sin', 'cos', 'tan', 'log', 'ln', 'sqrt'}:  # Funciones trigonométricas y logarítmicas
-            self.attach_widget.insert("insert", f"{key}(")
-        elif key == '^':  # Potencia
-            self.attach_widget.insert("insert", '**')
+    def _on_key_press(self, key):
+        """Define el comportamiento de cada tecla."""
+        if key == 'Clear':
+            self.attach.delete(0, END)
+        elif key == 'Enter':
+            self.attach.insert(END, ' = ')
+        elif key in {'π', 'e', 'sin', 'cos', 'tan', 'sqrt'}:
+            self.attach.insert(END, f"{key}(" if key not in {'π', 'e'} else key)
+        elif key == '^':
+            self.attach.insert(END, '**')
         else:
-            self.attach_widget.insert("insert", key)
+            self.attach.insert(END, key)
 
-    def toggle(self, event=None):
-        """Alterna la visibilidad del teclado."""
-        if self.state() == "withdrawn":
-            self.deiconify()
-            self.geometry(f"+{self.attach_widget.winfo_rootx()}+{self.attach_widget.winfo_rooty() + 30}")
-        else:
-            self.withdraw()
+    def destroy_popup(self):
+        """Destruye el teclado."""
+        self.destroy()
+        self.disable = True
