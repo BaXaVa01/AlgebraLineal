@@ -18,30 +18,66 @@
                     "max_iter": 30
                 },
                 "resultado": -42.411500823462205
+            },
+            {
+                "funcion": "sin(2*x) - cos(x)",
+                "variables": {
+                    "x0": 2.5,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": 2.6179938779914966
+            },
+            {
+                "funcion": "sin(2*x) + cos(x)",
+                "variables": {
+                    "x0": 2.5,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": -42.411500823462205
+            },
+            {
+                "funcion": "x^2 - 3",
+                "variables": {
+                    "x0": 0.5,
+                    "tol": 1e-05,
+                    "max_iter": 1000
+                },
+                "resultado": 1.7320508075688774
+            },
+            {
+                "funcion": "x^2 - 3",
+                "variables": {
+                    "x0": 0.5,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": 1.7320508075688774
             }
         ]
     },
     "biseccion": {
         "funciones": [
             {
-                "funcion": "sin(x)**2-0.5",
-                "variables": {
-                    "a": 1.0,
-                    "b": 3.0,
-                    "tol": 0.0001,
-                    "max_iter": 30
-                },
-                "resultado": 2.3560791015625
-            },
-            {
-                "funcion": "x*2",
+                "funcion": "sin(2*x) - cos(x)",
                 "variables": {
                     "a": -1.0,
-                    "b": 2.0,
+                    "b": 1.0,
                     "tol": 0.0001,
-                    "max_iter": 30
+                    "max_iter": 1000
                 },
-                "resultado": -6.103515625e-05
+                "resultado": 0.5235595703125
+            },
+            {
+                "funcion": "sin(2*x) - cos(x)",
+                "variables": {
+                    "a": -1.0,
+                    "b": 1.0,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": 0.5235595703125
             }
         ]
     }
