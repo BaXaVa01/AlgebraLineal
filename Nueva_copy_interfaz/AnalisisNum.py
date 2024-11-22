@@ -9,13 +9,22 @@ from tabs.settings_tab import SettingsTab, initialize_fonts
 from tabs.reportes_tab import ReportesTab  # Importar la nueva pestaña de Reportes
 
 
-class MainApp(ctk.CTk):
-    def __init__(self):
+class AnalisisNum(ctk.CTk):
+    def __init__(self, parent_menu):
         super().__init__()
+
+        # Guardar referencia al menú principal
+        self.parent_menu = parent_menu
 
         # Configuración de la ventana principal
         self.title("Aplicación de Métodos Numéricos")
-        self.geometry("1000x600")
+        window_width = 1000
+        window_height = 600
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x = (screen_width // 2) - (window_width // 2)
+        y = (screen_height // 2) - (window_height // 2)
+        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
         self.minsize(800, 500)  # Tamaño mínimo para evitar problemas de visualización
         self.set_appearance()
         
@@ -39,12 +48,19 @@ class MainApp(ctk.CTk):
         self.settings_tab = SettingsTab(self.tabview)
         self.reportes_tab = ReportesTab(self.tabview)  # Agregar la pestaña de Reportes
 
+        # Vincular el evento de cerrar ventana
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+        
     def set_appearance(self):
         """Configura el modo de apariencia y el tema de color."""
         ctk.set_appearance_mode("System")  # Cambia entre 'System', 'Dark' y 'Light'
         ctk.set_default_color_theme("blue")  # Cambia el color de tema si es necesario
 
-
+    def on_close(self):
+        """Regresa al menú principal al cerrar AnalisisNum."""
+        self.destroy()
+        self.parent_menu.deiconify()
+        
 if __name__ == "__main__":
-    app = MainApp()
+    app = AnalisisNum()
     app.mainloop()
