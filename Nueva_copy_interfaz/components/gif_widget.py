@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from PIL import Image, ImageTk, ImageSequence
 import os
+import tkinter as tk
 
 # Definir la ruta base relativa al archivo actual
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Subimos un nivel desde el directorio actual
@@ -23,6 +24,7 @@ class GIFWidget(ctk.CTkFrame):
         self.gif_labels = []  # Lista para etiquetas de GIFs
         self.frames = {}  # Diccionario para almacenar fotogramas de cada GIF
         self.running = False  # Control de animación de GIFs
+        self.speed_multiplier = 1.0  # Multiplicador de velocidad inicial
 
         # Cargar y mostrar los GIFs
         self.load_gifs(gif_paths or self._get_default_gif_paths())
@@ -50,6 +52,7 @@ class GIFWidget(ctk.CTkFrame):
                     side="left" if horizontal else "top", padx=2, pady=2  # Reduce el espaciado entre GIFs
                 )
                 gif_label.bind("<Button-1>", lambda e, path=gif_path: self.open_gif_window(path))
+                gif_label.bind("<Button-3>", lambda e, path=gif_path: self.open_context_menu(e, path))
                 self.gif_labels.append((gif_label, gif_path))
                 self.frames[gif_path] = self._load_frames(gif_path)
 
@@ -79,7 +82,8 @@ class GIFWidget(ctk.CTkFrame):
             return
         gif_label.configure(image=frames[index])
         gif_label.image = frames[index]  # Mantener referencia para evitar el garbage collection
-        self.after(100, self._update_frame, gif_label, frames, (index + 1) % len(frames))
+        delay = int(100 / self.speed_multiplier)  # Ajustar duración según el multiplicador
+        self.after(delay, self._update_frame, gif_label, frames, (index + 1) % len(frames))
 
     def clear_gifs(self):
         """Limpia todos los GIFs del widget."""
@@ -124,6 +128,31 @@ class GIFWidget(ctk.CTkFrame):
         gif_label.image = frames[index]  # Mantener referencia
         self.after(100, self._animate_original_gif, gif_label, frames, (index + 1) % len(frames))
 
+    def open_context_menu(self, event, gif_path):
+        """Abre un menú contextual al hacer clic derecho."""
+        menu = tk.Menu(self, tearoff=0)  # Usamos tkinter.Menu
+        menu.add_command(label="Ajustar velocidad", command=lambda: self.open_speed_window())
+        menu.post(event.x_root, event.y_root)
+
+    def open_speed_window(self):
+        """Abre una ventana para ajustar la velocidad del GIF."""
+        speed_window = ctk.CTkToplevel(self)
+        speed_window.title("Ajustar Velocidad")
+        speed_window.geometry("300x150")
+
+        label = ctk.CTkLabel(speed_window, text="Ajustar velocidad (0.5x - 1.5x):")
+        label.pack(pady=10)
+
+        slider = ctk.CTkSlider(speed_window, from_=0.5, to=1.5, number_of_steps=10)
+        slider.set(self.speed_multiplier)
+        slider.pack(pady=10)
+
+        def apply_speed():
+            self.speed_multiplier = slider.get()
+            speed_window.destroy()
+
+        apply_button = ctk.CTkButton(speed_window, text="Aplicar", command=apply_speed)
+        apply_button.pack(pady=10)
 
 
 

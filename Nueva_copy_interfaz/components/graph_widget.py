@@ -9,6 +9,8 @@ class GraphWidget(ctk.CTkFrame):
     def __init__(self, master, width=500, height=400, **kwargs):
         super().__init__(master, width=width, height=height, **kwargs)
         self.pack_propagate(False)
+        self.previous_points = []  # Almacena referencias a puntos previos
+
 
         # Inicializar la figura de Matplotlib
         self.figure, self.ax = plt.subplots(figsize=(5, 4))
@@ -66,6 +68,33 @@ class GraphWidget(ctk.CTkFrame):
 
         # Actualizar el canvas
         self.canvas.draw()
+    def plot_points(self, points):
+        """
+        Grafica puntos individuales en el eje actual.
+        Args:
+            points (list): Lista de diccionarios con las claves:
+                        - 'x': Coordenada x del punto.
+                        - 'y': Coordenada y del punto.
+                        - 'color': Color del punto.
+                        - 'label': Etiqueta del punto (opcional).
+        """
+        # Limpiar puntos previos si existen
+        if hasattr(self, "previous_points") and self.previous_points:
+            for artist in self.previous_points:
+                artist.remove()
+            self.previous_points.clear()
+
+        # Almacenar puntos actuales
+        self.previous_points = []
+
+        for point in points:
+            scatter = self.ax.scatter(point["x"], point["y"], color=point["color"], label=point.get("label", ""))
+            self.previous_points.append(scatter)
+
+        # Actualizar la leyenda para incluir nuevos puntos
+        self.ax.legend()
+        self.canvas.draw()
+
 
     def clear_plot(self):
         """Limpia el gráfico."""

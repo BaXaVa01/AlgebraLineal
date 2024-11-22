@@ -6,7 +6,7 @@ import customtkinter as ctk
 from tkinter import ttk
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ANIMATION_PATH = os.path.join(BASE_DIR, "animation.py")
+ANIMATION_PATH = os.path.join(BASE_DIR,"animation.py")
 
 def generar_gif_desde_json(metodo, indice, gif_frame, callback=None):
     """
@@ -44,8 +44,9 @@ def generar_gif_desde_json(metodo, indice, gif_frame, callback=None):
                 metodo, str(indice), json_path
             ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            gif_frame.after(0, progress_bar.stop)  # Detener la barra de progreso
-            gif_frame.after(0, progress_frame.destroy)  # Eliminar el frame de la barra de progreso
+            gif_frame.after(0, lambda: progress_bar.stop() if progress_bar.winfo_exists() else None)  # Detener barra si existe
+            gif_frame.after(100, lambda: progress_frame.destroy() if progress_frame.winfo_exists() else None)  # Luego destruir el frame
+
 
             if result.returncode == 0:
                 if callback:

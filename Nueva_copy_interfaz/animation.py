@@ -4,10 +4,10 @@ from logic.biseccion_logic import *
 from logic.newton_raphson_logic import *
 import math
 import sys
-from sympy import sympify, lambdify, symbols
-import sympy as sp
+from sympy import sympify, lambdify, symbols, Interval
 import json
 import sys
+from utils.calc_utils import calcular_rango_valido
 
 def cargar_datos_desde_json():
     archivo = sys.argv[-1]
@@ -67,24 +67,25 @@ class BiseccionAnimation(Scene):
         self.wait(2)
 
 
-class NewtonRaphsonAnimation(Scene):
+class NewtonRaphsonAnimation(MovingCameraScene):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.funcion_str, self.variables = cargar_datos_desde_json()  # Cargar datos desde JSON
 
     def construct(self):
-        time=0.5
+        time = 0.5
         x0, tol = self.variables["x0"], self.variables["tol"]
-        x = symbols('x')
+        x = symbols("x")
         funcion_sympy = sympify(self.funcion_str)
         f = lambdify(x, funcion_sympy, modules=["numpy"])
-        
+        x_range = calcular_rango_valido(self.funcion_str)
+
         # Ejecutar el método de Newton-Raphson
         resultado = newton_raphson(self.funcion_str, x0, tol)
-        
+
         # Crear ejes y gráfica de la función
         axes = Axes(
-            x_range=[-10, 10, 1],
+            x_range=x_range,
             y_range=[-10, 10, 5],
             axis_config={"color": BLUE, "include_numbers": True}
         )
@@ -94,53 +95,39 @@ class NewtonRaphsonAnimation(Scene):
         zoom_count = 0  # Control del zoom
         previous_x, previous_y = None, None
 
-        # Capturar el estado inicial
-        initial_axes = axes.copy()
-        initial_graph = graph.copy()
+        # Capturar el estado inicial de la cámara
+        self.camera.frame.save_state()
 
         for iteracion in resultado["iteraciones"]:
             x_val = iteracion["x"]
             y_val = f(x_val)
 
-            # Calcular la pendiente de la tangente en x_val usando la derivada exacta
+            # Calcular la pendiente de la tangente en x_val
             derivada = funcion_sympy.diff(x)
             slope = derivada.subs(x, x_val).evalf()
 
             # Verificar si se necesita hacer zoom cuando los puntos están cerca
-            if previous_x is not None and abs(x_val - previous_x) < 1 and abs(y_val - previous_y) < 1 and zoom_count < 3:
-                scale_factor = 1.5  # Escalado moderado hacia el centro de la pantalla
-                # Crear nuevos ejes centrados en el punto pero con el centro de pantalla como referencia
-                new_axes = axes.copy().scale(scale_factor)
-                new_graph = new_axes.plot(lambda x_val: f(x_val), color=YELLOW)
-                
-                # Reemplazar los ejes y el gráfico con animación de zoom al centro
+            if (
+                previous_x is not None 
+                and abs(x_val - previous_x) < 1
+                and abs(y_val - previous_y) < 1 
+                and zoom_count < 3
+            ):
+                potencia=4
+                # Hacer zoom hacia el punto
                 self.play(
-                    ReplacementTransform(axes, new_axes),
-                    ReplacementTransform(graph, new_graph),
+                    self.camera.frame.animate.move_to(axes.coords_to_point(x_val, y_val)).set(width=potencia),
                     run_time=1
                 )
-                axes = new_axes
-                graph = new_graph
+                potencia+=2
                 zoom_count += 1
-            elif not (axes.x_range[0] <= x_val <= axes.x_range[1] and axes.y_range[0] <= y_val <= axes.y_range[1]):  
-                # Crear nuevos ejes centrados en el punto actual sin aplicar zoom
-                new_axes = Axes(
-                    x_range=[x_val - 5, x_val + 5, 1],
-                    y_range=[y_val - 5, y_val + 5, 1],
-                    axis_config={"color": BLUE, "include_numbers": True}
-                )
-                new_graph = new_axes.plot(lambda x_val: f(x_val), color=YELLOW)
-
-                # Reemplazar los ejes y el gráfico con animación de centrado
+            else:
+                # Mover la cámara para seguir el punto sin hacer zoom
                 self.play(
-                    ReplacementTransform(axes, new_axes),
-                    ReplacementTransform(graph, new_graph),
-                    run_time=1
+                    self.camera.frame.animate.move_to(axes.coords_to_point(x_val, y_val)),
+                    run_time=0.5
                 )
-                axes = new_axes
-                graph = new_graph
-            if zoom_count==3:
-                time=0.2
+
             # Crear la línea tangente
             x_min, x_max = x_val - 1, x_val + 1
             tangent_start = axes.coords_to_point(x_min, slope * (x_min - x_val) + y_val)
@@ -153,20 +140,19 @@ class NewtonRaphsonAnimation(Scene):
 
             # Animar la tangente y el punto
             self.play(Create(tangent_line), FadeIn(point), FadeIn(label), run_time=time)
-            self.wait(time)
+            self.wait(time-0.2)
             self.play(FadeOut(tangent_line), FadeOut(point), FadeOut(label))
 
             # Actualizar los valores para la próxima iteración
             previous_x, previous_y = x_val, y_val
             x0 = x_val
 
-        # Restaurar el zoom inicial al final
-        self.play(
-            ReplacementTransform(axes, initial_axes),
-            ReplacementTransform(graph, initial_graph),
-            run_time=1
-        )
-        result_text = Text(f"Raíz aproximada: {x_val:.5f}").next_to(axes, DOWN)
+        # Restaurar la cámara al estado inicial
+        self.play(Restore(self.camera.frame))
+
+        # Mostrar el resultado final
+        x_final = resultado["iteraciones"][-1]["x"]
+        result_text = Text(f"Raíz aproximada: {x_final:.5f}").next_to(axes, DOWN)
         self.play(Write(result_text))
         self.wait(2)
 

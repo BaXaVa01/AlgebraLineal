@@ -45,7 +45,7 @@ def biseccion(f, a, b, E=1e-5, max_iter=100):
         yu = f(b)
         yr = f(c)
         if iter_count > 0:
-            error_relativo = abs((c - prev_c) / c) * 100
+            error_relativo = abs((c - prev_c))
         pasos.append(f"{iter_count + 1}, {a}, {b}, {c}, {error_relativo}, {yi}, {yu}, {yr}")
         if f(c) == 0:
             return c, 0, pasos, iter_count + 1

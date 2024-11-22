@@ -1,6 +1,21 @@
 import sympy as sp
 
 def newton_raphson(funcion_str, x0, tol=1e-6, max_iter=1000):
+    """
+    Implementa el método de Newton-Raphson para encontrar raíces de una función.
+
+    Args:
+        funcion_str (str): La función como cadena.
+        x0 (float): Valor inicial.
+        tol (float): Tolerancia para la convergencia.
+        max_iter (int): Número máximo de iteraciones.
+
+    Returns:
+        dict: Información sobre la convergencia y las iteraciones realizadas.
+
+    Raises:
+        ValueError: Si la función o derivada no es válida en algún punto.
+    """
     # Definir la variable simbólica
     x = sp.symbols('x')
     if not funcion_str:
@@ -19,9 +34,17 @@ def newton_raphson(funcion_str, x0, tol=1e-6, max_iter=1000):
         iteraciones = []
 
         for i in range(max_iter):
+            # Verificar si el valor actual está dentro del dominio válido
+            if x0 <= 0 and 'log' in funcion_str:
+                raise ValueError(f"x no válido en la iteración {i + 1}. Dominio restringido para logaritmos.")
+
             # Depuración: Verificar valores de f y f_prime en x0
-            fx = f(x0)
-            fpx = f_prime(x0)
+            try:
+                fx = f(x0)
+                fpx = f_prime(x0)
+            except Exception as eval_error:
+                raise ValueError(f"Error al evaluar f(x) o f'(x) en x = {x0}: {eval_error}")
+            
             print(f"Iteración {i+1}: x0 = {x0}, f(x0) = {fx}, f'(x0) = {fpx}")
 
             # Verificar si la derivada es cero

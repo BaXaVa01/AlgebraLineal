@@ -2,16 +2,6 @@
     "newton_raphson": {
         "funciones": [
             {
-                "funcion": "x^2 - 3",
-                "variables": {
-                    "x0": 0.5,
-                    "tol": 1e-05,
-                    "max_iter": 1000
-                },
-                "dx": "x",
-                "resultado": 1.7320508075688774
-            },
-            {
                 "funcion": "sin(x*2)+cos(x)",
                 "variables": {
                     "x0": 2.5,
@@ -20,31 +10,61 @@
                 },
                 "dx": "<function _lambdifygenerated at 0x000001D162F1A0C0>",
                 "resultado": -42.411500823462205
+            },
+            {
+                "funcion": "x**(1/2)-x**2",
+                "variables": {
+                    "x0": 1.5,
+                    "tol": 1e-06,
+                    "max_iter": 1000
+                },
+                "dx": "<function _lambdifygenerated at 0x0000021282F74C20>",
+                "resultado": 0.9999999999999999
+            },
+            {
+                "funcion": "sqrt(x)-x**2",
+                "variables": {
+                    "x0": 0.5,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "dx": "<function _lambdifygenerated at 0x0000028CE33B2CA0>",
+                "resultado": 1.0000000000036233
+            },
+            {
+                "funcion": "x**2",
+                "variables": {
+                    "x0": 2.0,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "dx": "<function _lambdifygenerated at 0x000001F24C8DBF60>",
+                "resultado": 6.103515625e-05
+            },
+            {
+                "funcion": "x*ln(x)-1",
+                "variables": {
+                    "x0": 5.0,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "dx": "<function _lambdifygenerated at 0x00000203C03FD620>",
+                "resultado": 1.7632228343518968
+            },
+            {
+                "funcion": "x*ln(x)-1",
+                "variables": {
+                    "x0": 5.0,
+                    "tol": 1e-05,
+                    "max_iter": 10000
+                },
+                "dx": "<function _lambdifygenerated at 0x000001FED68CE340>",
+                "resultado": 1.7632228343518968
             }
         ]
     },
     "biseccion": {
         "funciones": [
-            {
-                "funcion": "sin(2*x) - cos(x)",
-                "variables": {
-                    "a": -1.0,
-                    "b": 1.0,
-                    "tol": 0.0001,
-                    "max_iter": 1000
-                },
-                "resultado": 0.5235595703125
-            },
-            {
-                "funcion": "sin(2*x) - cos(x)",
-                "variables": {
-                    "a": -1.0,
-                    "b": 1.0,
-                    "tol": 0.0001,
-                    "max_iter": 1000
-                },
-                "resultado": 0.5235595703125
-            },
             {
                 "funcion": "2*x",
                 "variables": {
@@ -56,14 +76,24 @@
                 "resultado": -6.103515625e-05
             },
             {
-                "funcion": "x*2",
+                "funcion": "x+2",
                 "variables": {
-                    "a": -1.0,
-                    "b": 2.0,
-                    "tol": 0.0001,
-                    "max_iter": 100
+                    "a": -3.0,
+                    "b": 0.0,
+                    "tol": 1e-05,
+                    "max_iter": 1000
                 },
-                "resultado": -6.103515625e-05
+                "resultado": -2.0000038146972656
+            },
+            {
+                "funcion": "x*ln(x)-1",
+                "variables": {
+                    "a": 0.3,
+                    "b": 5.0,
+                    "tol": 1e-05,
+                    "max_iter": 10000
+                },
+                "resultado": 1.7632099151611327
             }
         ]
     }

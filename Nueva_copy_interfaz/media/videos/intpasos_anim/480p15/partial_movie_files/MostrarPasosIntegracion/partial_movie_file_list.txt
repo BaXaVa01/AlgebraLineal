@@ -1,0 +1,8 @@
+# This file is used internally by FFMPEG.
+file 'file:C:/Users/david/OneDrive/Escritorio/Code/kata/py/AlgebraLineal/AlgebraLineal/Nueva_copy_interfaz/media/videos/intpasos_anim/480p15/partial_movie_files/MostrarPasosIntegracion/1185818338_1098246711_223132457.mp4'
+file 'file:C:/Users/david/OneDrive/Escritorio/Code/kata/py/AlgebraLineal/AlgebraLineal/Nueva_copy_interfaz/media/videos/intpasos_anim/480p15/partial_movie_files/MostrarPasosIntegracion/624642324_2441294261_3494822313.mp4'
+file 'file:C:/Users/david/OneDrive/Escritorio/Code/kata/py/AlgebraLineal/AlgebraLineal/Nueva_copy_interfaz/media/videos/intpasos_anim/480p15/partial_movie_files/MostrarPasosIntegracion/624642324_1141282389_2469960234.mp4'
+file 'file:C:/Users/david/OneDrive/Escritorio/Code/kata/py/AlgebraLineal/AlgebraLineal/Nueva_copy_interfaz/media/videos/intpasos_anim/480p15/partial_movie_files/MostrarPasosIntegracion/624642324_3213216619_2565008736.mp4'
+file 'file:C:/Users/david/OneDrive/Escritorio/Code/kata/py/AlgebraLineal/AlgebraLineal/Nueva_copy_interfaz/media/videos/intpasos_anim/480p15/partial_movie_files/MostrarPasosIntegracion/624642324_1141282389_3554190858.mp4'
+file 'file:C:/Users/david/OneDrive/Escritorio/Code/kata/py/AlgebraLineal/AlgebraLineal/Nueva_copy_interfaz/media/videos/intpasos_anim/480p15/partial_movie_files/MostrarPasosIntegracion/624642324_4074043385_383477400.mp4'
+file 'file:C:/Users/david/OneDrive/Escritorio/Code/kata/py/AlgebraLineal/AlgebraLineal/Nueva_copy_interfaz/media/videos/intpasos_anim/480p15/partial_movie_files/MostrarPasosIntegracion/624642324_2475379470_3841431732.mp4'
