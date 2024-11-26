@@ -60,6 +60,16 @@
                 },
                 "dx": "<function _lambdifygenerated at 0x000001FED68CE340>",
                 "resultado": 1.7632228343518968
+            },
+            {
+                "funcion": "x**2",
+                "variables": {
+                    "x0": 3.0,
+                    "tol": 1e-05,
+                    "max_iter": 10000
+                },
+                "dx": "<function _lambdifygenerated at 0x000001ED58770540>",
+                "resultado": 5.7220458984375e-06
             }
         ]
     },
@@ -94,6 +104,74 @@
                     "max_iter": 10000
                 },
                 "resultado": 1.7632099151611327
+            }
+        ]
+    },
+    "secante": {
+        "funciones": [
+            {
+                "funcion": "1/(x-1)-2",
+                "variables": {
+                    "x0": 1.3,
+                    "x1": 1.6,
+                    "tol": 0.0001,
+                    "max_iter": 10000
+                },
+                "resultado": 1.4999999868928
+            },
+            {
+                "funcion": "sqrt(x)-x**2",
+                "variables": {
+                    "x0": 1.3,
+                    "x1": 10.0,
+                    "tol": 1e-06,
+                    "max_iter": 10000
+                },
+                "resultado": 1.0000000000137035
+            },
+            {
+                "funcion": "sqrt(x)-x**2",
+                "variables": {
+                    "x0": 1.2,
+                    "x1": 15.0,
+                    "tol": 1e-06,
+                    "max_iter": 10000
+                },
+                "resultado": 1.000000000000472
+            },
+            {
+                "funcion": "sqrt(x)-x**2",
+                "variables": {
+                    "x0": 6.0,
+                    "x1": 15.0,
+                    "tol": 1e-06,
+                    "max_iter": 10000
+                },
+                "resultado": 1.0000000000000002
+            }
+        ]
+    },
+    "falsa_posicion": {
+        "funciones": [
+            {
+                "funcion": "sqrt(x) + sin(x)/x - x**2 + 5*x - 6",
+                "variables": {
+                    "a": 1.0,
+                    "b": 3.0,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": 1.050549841653703
+            },
+            {
+                "funcion": "sec(x)-2*x",
+                "variables": {
+                    "a": 1.2,
+                    "b": 1.9,
+                    "tol": 1e-05,
+                    "max_iter": 10000
+                },
+                "resultado": 1.5707918318609584
             }
         ]
     }

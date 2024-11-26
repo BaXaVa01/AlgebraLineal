@@ -48,7 +48,7 @@ class GraphWidget(ctk.CTkFrame):
             return
 
         # Genera un rango extendido para visualizar en desplazamientos
-        x_values = np.linspace(x_min, x_max, 1000)
+        x_values = np.linspace(x_min, x_max, 10000)
 
         try:
             y_values = self.func(x_values)
