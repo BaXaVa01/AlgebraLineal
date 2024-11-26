@@ -9,10 +9,24 @@ import numpy as np
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
+# Función para reemplazar funciones matemáticas comunes
+def procesar_funcion(funcion_str):
+    # Reemplazar funciones como sen, cos, ln, log
+    funcion_str = funcion_str.replace("sen", "sin")
+    funcion_str = funcion_str.replace("ln", "log")
+    funcion_str = funcion_str.replace("cos", "cos")
+    funcion_str = funcion_str.replace("log", "log")
+    return funcion_str
+
 # Función del método de la falsa posición
 def falsa_posicion(funcion, a, b, tolerancia, max_iter=100):
     x = sp.symbols('x')
-    f = sp.sympify(funcion)
+    funcion = procesar_funcion(funcion)  # Procesamos la función ingresada
+
+    try:
+        f = sp.sympify(funcion)
+    except sp.SympifyError:
+        raise ValueError("La función ingresada no es válida.")
 
     fa = f.subs(x, a)
     fb = f.subs(x, b)
