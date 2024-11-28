@@ -34,37 +34,6 @@ sidebar_visible = False
 buttons = []  
 model = LatexOCR()
 
-<<<<<<< HEAD
-    
-def biseccion(f, a, b, E=1e-5, max_iter=100):
-    """
-    Encuentra una raíz de la función f en el intervalo [a, b] usando el método de bisección.
-    
-    :param f: Función para la cual se busca la raíz.
-    :param a: Límite inferior del intervalo.
-    :param b: Límite superior del intervalo.
-    :param E: Precisión requerida.
-    :param max_iter: Número máximo de iteraciones.
-    :return: Aproximación de la raíz, el error relativo porcentual, los pasos de cada iteración y el número de iteraciones.
-    """
-    try:
-        if f(a) * f(b) >= 0:
-            raise ValueError("La función debe tener signos opuestos en los extremos del intervalo [a, b].")
-        
-        iter_count = 0
-        c = (a + b) / 2.0
-        prev_c = c
-        error_relativo = float('inf')
-        pasos = []
-        
-        while (b - a) / 2.0 > E and iter_count < max_iter:
-            c = (a + b) / 2.0
-            pasos.append(f"Iteración {iter_count + 1}: a = {a}, b = {b}, c = {c}, f(c) = {f(c)}")
-            if f(c) == 0:
-                return c, 0, pasos, iter_count + 1  # La raíz exacta ha sido encontrada
-            elif f(a) * f(c) < 0:
-                b = c
-=======
 def resolverMatriz():
     while salir==False:
         matrix=obtener_matriz_desde_input()
@@ -85,7 +54,6 @@ def resolverMatriz():
             input_text = input("Ingrese 's' para resolver otra matriz o cualquier otra tecla para salir: ")
             if input_text.lower() == 's':
                 os.system('cls')
->>>>>>> 16f6a10 (new)
             else:
                 a = c
             

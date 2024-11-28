@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from AnalisisNum import AnalisisNum
+from AlgebraLin import AlgebraLin
 from animations.pendulum import SineWaveBackground
 
 
@@ -49,8 +50,10 @@ class MainMenu(ctk.CTk):
         self.footer_label.place(relx=0.5, rely=0.95, anchor="center")
 
     def open_matrix_calculator(self):
-        """Abre la interfaz de Calculadora de Matrices."""
-        print("Calculadora de Matrices abierta")
+
+        self.withdraw()
+        app = AlgebraLin(self)
+        app.mainloop()
 
     def open_numerical_analysis(self):
         """Abre la interfaz de Análisis Numérico."""

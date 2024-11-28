@@ -32,6 +32,14 @@ class IntroTab:
         self.pdf_frame.pack(fill="both", expand=True, padx=10, pady=10)
         self.pdf_frame.pack_forget()  # Ocultar inicialmente
 
+        self.show_manual_button = ctk.CTkButton(
+            self.tab,
+            text="Volver al menu principal",
+            command=lambda: self.show_pdf(pdf_path),
+        )
+        self.show_manual_button.pack(pady=20)
+        
+
     def show_pdf(self, pdf_path):
         """Muestra el visor de PDF en la pestaña."""
         try:

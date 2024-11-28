@@ -2,16 +2,6 @@
     "newton_raphson": {
         "funciones": [
             {
-                "funcion": "sin(x*2)+cos(x)",
-                "variables": {
-                    "x0": 2.5,
-                    "tol": 0.0001,
-                    "max_iter": 1000
-                },
-                "dx": "<function _lambdifygenerated at 0x000001D162F1A0C0>",
-                "resultado": -42.411500823462205
-            },
-            {
                 "funcion": "x**(1/2)-x**2",
                 "variables": {
                     "x0": 1.5,
