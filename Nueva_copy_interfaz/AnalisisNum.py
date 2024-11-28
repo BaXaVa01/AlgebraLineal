@@ -7,8 +7,8 @@ from tabs.bisection_tab import BisectionTab
 from tabs.newton_tab import NewtonRaphsonTab
 from tabs.settings_tab import SettingsTab, initialize_fonts
 from tabs.reportes_tab import ReportesTab  # Importar la nueva pestaña de Reportes
-
-
+from tabs.secante_tab import SecanteTab
+from tabs.fakePosition_tab import FakePositionTab
 class AnalisisNum(ctk.CTk):
     def __init__(self, parent_menu):
         super().__init__()
@@ -45,9 +45,10 @@ class AnalisisNum(ctk.CTk):
         self.graph_tab = GraphTab(self.tabview)
         self.bisection_tab = BisectionTab(self.tabview)
         self.newton_raphson_tab = NewtonRaphsonTab(self.tabview)
+        self.secante_tab = SecanteTab(self.tabview)
+        self.falsepos=FakePositionTab(self.tabview)
         self.settings_tab = SettingsTab(self.tabview)
         self.reportes_tab = ReportesTab(self.tabview)  # Agregar la pestaña de Reportes
-
         # Vincular el evento de cerrar ventana
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         
