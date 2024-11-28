@@ -43,7 +43,7 @@ class MainMenu(ctk.CTk):
         # Crear footer
         self.footer_label = ctk.CTkLabel(
             self,
-            text="Creado por Davide - 2024",
+            text="Creado por BaxavaTeam- 2024",
             font=ctk.CTkFont(size=12),
             text_color="#88C0D0"
         )
