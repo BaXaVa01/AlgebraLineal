@@ -70,6 +70,26 @@
                 },
                 "dx": "<function _lambdifygenerated at 0x000001ED58770540>",
                 "resultado": 5.7220458984375e-06
+            },
+            {
+                "funcion": "x**2",
+                "variables": {
+                    "x0": 3.0,
+                    "tol": 1e-05,
+                    "max_iter": 10000
+                },
+                "dx": "<function _lambdifygenerated at 0x000001F6DFBF7B00>",
+                "resultado": 5.7220458984375e-06
+            },
+            {
+                "funcion": "x**2",
+                "variables": {
+                    "x0": 3.0,
+                    "tol": 0.0001,
+                    "max_iter": 10000
+                },
+                "dx": "<function _lambdifygenerated at 0x000002315EF21E40>",
+                "resultado": 9.1552734375e-05
             }
         ]
     },
@@ -104,6 +124,16 @@
                     "max_iter": 10000
                 },
                 "resultado": 1.7632099151611327
+            },
+            {
+                "funcion": "2*x",
+                "variables": {
+                    "a": -1.0,
+                    "b": 3.0,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": 0.0
             }
         ]
     },
@@ -148,6 +178,16 @@
                     "max_iter": 10000
                 },
                 "resultado": 1.0000000000000002
+            },
+            {
+                "funcion": "sec(x)-2*x",
+                "variables": {
+                    "x0": 0.5,
+                    "x1": 0.9,
+                    "tol": 0.0001,
+                    "max_iter": 10000
+                },
+                "resultado": 0.6100312845857668
             }
         ]
     },
@@ -172,6 +212,46 @@
                     "max_iter": 10000
                 },
                 "resultado": 1.5707918318609584
+            },
+            {
+                "funcion": "sec(x)-2*x",
+                "variables": {
+                    "a": 0.5,
+                    "b": 0.9,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": 0.61008833042957
+            },
+            {
+                "funcion": "x",
+                "variables": {
+                    "a": -1.0,
+                    "b": 3.0,
+                    "tol": 1e-05,
+                    "max_iter": 10000
+                },
+                "resultado": 0.0
+            },
+            {
+                "funcion": "tan(x)",
+                "variables": {
+                    "a": -1.0,
+                    "b": 1.0,
+                    "tol": 1e-05,
+                    "max_iter": 10000
+                },
+                "resultado": 0.0
+            },
+            {
+                "funcion": "tan(x)",
+                "variables": {
+                    "a": -1.0,
+                    "b": 1.5,
+                    "tol": 1e-05,
+                    "max_iter": 10000
+                },
+                "resultado": -9.354498300896162e-06
             }
         ]
     }

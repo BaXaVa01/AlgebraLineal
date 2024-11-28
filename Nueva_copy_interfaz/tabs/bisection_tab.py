@@ -11,14 +11,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSON_PATH = os.path.join(BASE_DIR, "files", "operaciones.json")
 
 class BisectionTab:
-    def __init__(self, tabview):
+    def __init__(self, parent):
         # Configurar campos de entrada y columnas de la tabla
         input_fieldsa = ["Función f(x)", "Límite inferior (a)", "Límite superior (b)", "Tolerancia", "Máximo de iteraciones"]
         table_columnsa = ["Iteración", "a", "b", "c", "Error", "f(a)", "f(b)", "f(c)"]
 
         # Crear una pestaña genérica usando CustomTab
         self.tab = CustomTab(
-            tabview=tabview,
+            tabview=parent,
             tab_name="Bisección",
             input_fields=input_fieldsa,
             table_columns=table_columnsa,
@@ -62,6 +62,14 @@ class BisectionTab:
                 iteracion, xi, xu, xr, Ea, yi, yu, yr = paso.split(", ")
                 data.append([iteracion, xi, xu, xr, Ea, yi, yu, yr])
             tab.table.insert_data(data)
+
+            # Mostrar los resultados clave en un MessageBox
+            messagebox.showinfo(
+                "Resultados del Método de Bisección",
+                f"Iteraciones: {iteraciones}\n"
+                f"Converge en: {raiz}\n"
+                f"Error absoluto: {error:.6f}"
+            )
 
             # Guardar operación en JSON
             variables = {"a": a, "b": b, "tol": tol, "max_iter": max_iter}

@@ -8,13 +8,13 @@ from sympy import symbols, sympify, lambdify
 from tkinter import messagebox
 
 class FakePositionTab:
-    def __init__(self, tabview):
+    def __init__(self, parent):
         # Crear la pestaña personalizada con el módulo CustomTab
         self.custom_tab = CustomTab(
-            tabview=tabview,
+            tabview=parent,
             tab_name="Falsa Posición",
             input_fields=["Función f(x)", "Extremo a", "Extremo b", "Tolerancia", "Máx. Iteraciones"],
-            table_columns=["Iteración", "a", "b", "c", "f(c)", "Error relativo"],
+            table_columns=["Iteración", "a", "b", "c", "f(c)", "Error absoluto"],
             execute_callback=self.ejecutar_falsa_posicion,
             plot_step_callback=self.plot_step
         )
