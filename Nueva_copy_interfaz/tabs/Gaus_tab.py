@@ -44,13 +44,11 @@ class GaussJordanSolver:
             self.left_frame, text="Mostrar Paso a Paso", command=self.show_steps, state="disabled"
         )
         self.steps_button.pack(pady=10)
-
         # Botón para copiar la matriz
         self.copy_matrix_button = ctk.CTkButton(
             self.left_frame, text="Copiar Matriz", command=self.copy_matrix, state="disabled"
         )
         self.copy_matrix_button.pack(pady=10)
-
         # Botón para pegar la matriz
         self.paste_matrix_button = ctk.CTkButton(
             self.left_frame, text="Pegar Matriz", command=self.paste_matrix

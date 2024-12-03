@@ -1,5 +1,7 @@
 # main.py
 import customtkinter as ctk
+
+from Nueva_copy_interfaz.tabs.ComprobanteMatrix_tab import ComprobanteResultados
 from tabs.algebra.inversaDeMatriz_Tab import InversaDeMatriz_Tab
 from tabs.matrices_Tab import MatricesTab
 from tabs.graph_tab import GraphTab
@@ -52,6 +54,7 @@ class AlgebraLin(ctk.CTk):
         self.graficador_tab = GraphTab(self.tabview)
         self.resolutorLU = EquationSolver(self.tabview)
         self.gauss = GaussJordanSolver(self.tabview)
+        self.comprobante = ComprobanteResultados(self.tabview)
 
         # Vincular el evento de cerrar ventana
         self.protocol("WM_DELETE_WINDOW", self.on_close)
