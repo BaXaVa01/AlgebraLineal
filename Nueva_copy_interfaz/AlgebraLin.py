@@ -1,7 +1,9 @@
 # main.py
 import customtkinter as ctk
 from tabs.algebra.inversaDeMatriz_Tab import InversaDeMatriz_Tab
-
+from tabs.matrices_Tab import MatricesTab
+from tabs.graph_tab import GraphTab
+from tabs.ResolutorMatrix import EquationSolver
 # from tabs.algebra.cramer_Tab import CramerTab
 # from tabs.algebra.gauss_Tab import GaussTab
 # from tabs.algebra.gauss_jordan_Tab import GaussJordanTab
@@ -45,6 +47,9 @@ class AlgebraLin(ctk.CTk):
 
         # Inicializar las pestañas
         self.inversaDeMatriz_tab = InversaDeMatriz_Tab(self.tabview)
+        self.matrix_tab = MatricesTab(self.tabview)
+        self.graficador_tab = GraphTab(self.tabview)
+        self.resolutorLU = EquationSolver(self.tabview)
 
         # Vincular el evento de cerrar ventana
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -62,3 +67,4 @@ class AlgebraLin(ctk.CTk):
 if __name__ == "__main__":
     app = AlgebraLin()
     app.mainloop()
+
