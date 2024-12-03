@@ -67,7 +67,8 @@ class AlgebraLin(ctk.CTk):
     def on_close(self):
         """Regresa al menú principal al cerrar AlgebraLin."""
         self.destroy()
-        self.parent_menu.deiconify()
+        self.parent_menu.deiconify()  # Muestra el menú principal
+
         
 if __name__ == "__main__":
     app = AlgebraLin()

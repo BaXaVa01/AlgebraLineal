@@ -15,12 +15,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSON_PATH = os.path.join(BASE_DIR, "files", "operaciones.json")
 
 class NewtonRaphsonTab:
-    def __init__(self, tabview):
+    def __init__(self, parent):
         # Crear el graficador y la barra lateral
 
         # Crear la pestaña personalizada con el módulo CustomTab
         self.custom_tab = CustomTab(
-            tabview=tabview,
+            tabview=parent,
             tab_name="Newton",
             input_fields=["Función f(x)", "Valor inicial x0", "Tolerancia", "Máx. Iteraciones"],
             table_columns=["Iteración", "x", "f(x)", "f'(x)", "Error"],
@@ -88,6 +88,13 @@ class NewtonRaphsonTab:
 
             tab.table.insert_data(data)
 
+            # Mostrar resultados clave en un MessageBox
+            messagebox.showinfo(
+                "Resultados del Método Newton-Raphson",
+                f"Iteraciones: {len(pasos)}\n"
+                f"Converge en: {raiz}\n"
+                f"Error absoluto: {error}"
+            )
             # Graficar la función
             tab.graph_widget.plot_function(f, x_range=(x0 - 5, x0 + 5))
 

@@ -14,13 +14,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSON_PATH = os.path.join(BASE_DIR, "files", "operaciones.json")
 
 class SecanteTab:
-    def __init__(self, tabview):
+    def __init__(self, parent):
         # Crear la pestaña personalizada con el módulo CustomTab
         self.custom_tab = CustomTab(
-            tabview=tabview,
+            tabview=parent,
             tab_name="Secante",
             input_fields=["Función f(x)", "Valor inicial x0", "Valor inicial x1", "Tolerancia", "Máx. Iteraciones"],
-            table_columns=["Iteración", "x", "f(x)", "Error relativo"],
+            table_columns=["Iteración", "x", "f(x)", "Error absoluto"],
             execute_callback=self.ejecutar_secante,
             plot_step_callback=self.plot_step
         )

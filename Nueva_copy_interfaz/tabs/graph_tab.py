@@ -1,66 +1,50 @@
 import customtkinter as ctk
 from components.graph_widget import GraphWidget
+from components.upgrade.desmosui import FunctionManager
 from tkinter import messagebox
-from sympy import sympify, symbols, lambdify
+from sympy import symbols, sympify, lambdify
+
 
 class GraphTab:
     def __init__(self, tabview):
         # Crear la pestaña de graficador
         self.tab = tabview.add("Graficador")
 
-        # Entrada para la función
-        self.entry_function = ctk.CTkEntry(self.tab, width=200, font=("Arial", 14))
-        self.entry_function.pack(pady=10)
+        # Contenedor principal
+        self.main_frame = ctk.CTkFrame(self.tab)
+        self.main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Rango de valores de x
-        self.entry_x_min = ctk.CTkEntry(self.tab, width=100, placeholder_text="-10")
-        self.entry_x_min.pack(side="left", padx=5)
-        self.entry_x_max = ctk.CTkEntry(self.tab, width=100, placeholder_text="10")
-        self.entry_x_max.pack(side="left", padx=5)
-
-        # Botón para graficar
-        self.plot_button = ctk.CTkButton(self.tab, text="Graficar", command=self.plot_graph)
-        self.plot_button.pack(pady=10)
+        # Frame superior para el gestor de funciones
+        self.function_manager_frame = ctk.CTkFrame(self.main_frame)
+        self.function_manager_frame.pack(fill="x", pady=5)
 
         # Instancia del graficador
-        self.graph = GraphWidget(self.tab)
+        self.graph_frame = ctk.CTkFrame(self.main_frame)
+        self.graph_frame.pack(fill="both", expand=True, pady=10)
+
+        self.graph = GraphWidget(self.graph_frame)
         self.graph.pack(fill="both", expand=True, padx=10, pady=10)
 
-    def plot_graph(self):
-        """Obtiene la función y los límites de x, luego grafica."""
-        # Obtener función y rango de x
-        func_str = self.entry_function.get().strip()
-        x_min = float(self.entry_x_min.get() or -10)
-        x_max = float(self.entry_x_max.get() or 10)
+        # Instancia del gestor de funciones
+        self.function_manager = FunctionManager(self.function_manager_frame, self.graph)
+        self.function_manager.pack(fill="x", expand=True)
 
-        # Verificar si los valores de x_min y x_max son válidos
-        try:
-            x_min = int(x_min)  # Convertir a entero si es necesario
-            x_max = int(x_max)  # Convertir a entero si es necesario
-        except ValueError:
-            messagebox.showerror("Error", "Los valores de los límites deben ser números válidos.")
-            return
+        # Botón para limpiar el gráfico
+        self.clear_button = ctk.CTkButton(
+            self.main_frame,
+            text="Limpiar Todo",
+            fg_color="#F44336",
+            hover_color="#E53935",
+            command=self.clear_all
+        )
+        self.clear_button.pack(fill="x", pady=5)
 
-        # Función evaluable para el graficador
-        try:
-            func = self.safe_eval_function(func_str)
-            # Generar la gráfica en el widget
-            self.graph.plot_function(func, x_range=(x_min, x_max))
-        except Exception as e:
-            # Mostrar mensaje de error si la función no es válida
-            messagebox.showerror("Error", f"Hubo un error al procesar la función: {e}")
+    def clear_all(self):
+        """Limpia el gráfico y el gestor de funciones, dejando solo una fila vacía."""
+        # Limpia el gráfico
+        self.graph.clear_plot()
 
-    def safe_eval_function(self, func_str):
-        """Convierte la entrada de texto en una función evaluable utilizando sympy y numpy."""
-        x = symbols("x")  # Definir x como una variable simbólica
-
-        try:
-            # Convertir la cadena de texto en una expresión simbólica
-            expr = sympify(func_str)  # Convierte 'sin(x) + cos(x)' en una expresión
-            # Crear una función evaluable de numpy a partir de la expresión
-            func = lambdify(x, expr, "numpy")
-            return func
-        except Exception as e:
-            raise ValueError(f"Función no válida: {str(e)}")
-
+        # Limpia la tabla de funciones y asegura una fila vacía
+        self.function_manager.clear_data()
+        self.function_manager.ensure_empty_row()  # Garantiza que haya una fila vacía
 

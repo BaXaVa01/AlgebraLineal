@@ -38,7 +38,7 @@ def newton_raphson(funcion_str, x0, tol=1e-6, max_iter=1000):
             if x0 <= 0 and 'log' in funcion_str:
                 raise ValueError(f"x no válido en la iteración {i + 1}. Dominio restringido para logaritmos.")
 
-            # Depuración: Verificar valores de f y f_prime en x0
+            # Evaluar la función y su derivada
             try:
                 fx = f(x0)
                 fpx = f_prime(x0)
@@ -53,13 +53,26 @@ def newton_raphson(funcion_str, x0, tol=1e-6, max_iter=1000):
             
             # Calcular el siguiente valor de x
             x1 = x0 - fx / fpx
+
+            # Calcular el error absoluto
+            error_absoluto = abs(x1 - x0)
             
             # Añadir el resultado de la iteración
-            iteraciones.append({"iteracion": i + 1, "x": float(x1), "f(x)": float(fx)})
+            iteraciones.append({
+                "iteracion": i + 1,
+                "x": float(x1),
+                "f(x)": float(fx),
+                "error_absoluto": error_absoluto
+            })
             
             # Verificar la convergencia
-            if abs(x1 - x0) < tol:
-                return {"convergencia": True, "raiz": float(x1), "iteraciones": iteraciones}
+            if error_absoluto < tol:
+                return {
+                    "convergencia": True,
+                    "raiz": float(x1),
+                    "error_absoluto": error_absoluto,
+                    "iteraciones": iteraciones
+                }
             
             # Actualizar x0 para la siguiente iteración
             x0 = x1
