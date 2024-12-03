@@ -14,6 +14,8 @@ class FunctionManager(CTkTable):
         self.graph_widget = graph_widget
         self.color_palette = ["blue", "green", "red", "orange", "purple"]
         self.color_index = 0
+        self.function_states = {}  # Almacenar el estado de activación/desactivación por row_id
+
 
         # Asegurar que haya una fila vacía al inicio
         self.ensure_empty_row()
@@ -21,12 +23,15 @@ class FunctionManager(CTkTable):
                 # Crear menú contextual para borrar filas
         self.popup_menu = Menu(self.tree, tearoff=0)
         self.popup_menu.add_command(label="Eliminar fila", command=self.remove_selected_row)
+        self.popup_menu.add_command(label="Activar/Desactivar función", command=self.toggle_selected_function)
+
 
         # Vincular el clic derecho al menú contextual
         self.tree.bind("<Button-3>", self.show_popup)
         # Eventos interactivos
         self.tree.bind("<Double-1>", self.start_editing)
         self.tree.bind("<Return>", self.confirm_editing)
+
 
     def ensure_empty_row(self):
         """Garantiza que siempre haya una fila vacía al final."""
@@ -66,17 +71,21 @@ class FunctionManager(CTkTable):
         self.update_graph()
 
     def update_graph(self):
-        """Actualiza el gráfico con las funciones actuales."""
+        """Actualiza el gráfico con las funciones activas."""
         functions = []
-        for row in self.tree.get_children():
-            label, func_str, color = self.tree.item(row, "values")
-            if func_str.strip():  # Solo procesar filas con funciones no vacías
+        for row_id in self.tree.get_children():
+            if not self.function_states.get(row_id, True):  # Ignorar desactivadas
+                continue
+
+            label, func_str, color = self.tree.item(row_id, "values")
+            if func_str.strip():  # Solo procesar funciones válidas
                 try:
                     func = self.safe_eval_function(func_str)
                     functions.append({"func": func, "label": label, "color": color})
                 except ValueError:
-                    print(f"Función no válida: {func_str}")  # Ignorar errores en funciones específicas
+                    print(f"Función no válida: {func_str}")
         self.graph_widget.plot_multiple_functions(functions)
+
 
     def get_next_color(self):
         """Devuelve un color cíclico de la paleta."""
@@ -154,11 +163,13 @@ class FunctionManager(CTkTable):
         
     def show_popup(self, event):
         """Muestra el menú contextual al hacer clic derecho en una fila."""
-        # Identificar la fila bajo el cursor
         row_id = self.tree.identify_row(event.y)
         if row_id:  # Si hay una fila bajo el cursor
             self.tree.selection_set(row_id)  # Seleccionar la fila
             self.popup_menu.post(event.x_root, event.y_root)  # Mostrar el menú
+
+
+
 
     def remove_selected_row(self):
         """Elimina la fila seleccionada al hacer clic derecho."""
@@ -189,3 +200,36 @@ class FunctionManager(CTkTable):
             return latex(expr)
         except Exception:
             return
+    
+    def toggle_selected_function(self):
+        """Activa o desactiva la función seleccionada."""
+        selected = self.tree.selection()
+        if not selected:
+            return
+
+        for row_id in selected:
+            # Alternar el estado
+            current_state = self.function_states.get(row_id, True)  # Por defecto está activada
+            new_state = not current_state  # Cambiar estado
+
+            # Guardar el nuevo estado
+            self.function_states[row_id] = new_state
+
+            # Cambiar color y tags
+            label, func_str, color = self.tree.item(row_id, "values")
+            self.tree.item(
+                row_id,
+                values=(label, func_str, color),
+                tags=(["deactivated"] if not new_state else [])  # Agregar tag condicional
+            )
+
+            # Configurar colores según el estado
+            if not new_state:  # Desactivada
+                self.tree.tag_configure("deactivated", foreground="red")
+            else:  # Activada
+                self.tree.tag_configure("deactivated", foreground="black")  # Restablecer color
+
+        # Actualizar el gráfico después del cambio
+        self.update_graph()
+
+
