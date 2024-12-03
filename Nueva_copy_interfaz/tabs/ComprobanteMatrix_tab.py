@@ -18,7 +18,7 @@ class ComprobanteResultados:
         self.main_frame.grid(row=0, column=0, columnspan=2, sticky="nsew", padx=20, pady=20)
 
         # Frame izquierdo para botones y entrada
-        self.left_frame = ctk.CTkFrame(self.main_frame)
+        self.left_frame = ctk.CTkScrollableFrame(self.main_frame)
         self.left_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
 
         # Entrada para cantidad de variables
