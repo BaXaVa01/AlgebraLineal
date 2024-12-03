@@ -34,12 +34,6 @@ class EquationSolver:
         )
         self.generate_matrix_button.pack(pady=10)
 
-        # Botón para copiar la matriz
-        self.copy_matrix_button = ctk.CTkButton(
-            self.left_frame, text="Copiar Matriz", command=self.copy_matrix, state="disabled"
-        )
-        self.copy_matrix_button.pack(pady=10)
-
 
         # Botón para encontrar solución
         self.solve_button = ctk.CTkButton(
@@ -52,6 +46,18 @@ class EquationSolver:
             self.left_frame, text="Mostrar Paso a Paso", command=self.show_steps, state="disabled"
         )
         self.steps_button.pack(pady=10)
+
+        # Botón para copiar la matriz
+        self.copy_matrix_button = ctk.CTkButton(
+            self.left_frame, text="Copiar Matriz", command=self.copy_matrix, state="disabled"
+        )
+        self.copy_matrix_button.pack(pady=10)
+
+        # Botón para pegar la matriz
+        self.paste_matrix_button = ctk.CTkButton(
+            self.left_frame, text="Pegar Matriz", command=self.paste_matrix
+        )
+        self.paste_matrix_button.pack(pady=10)
 
         # Deslizador para ajustar el tamaño de la fuente
         self.font_slider_label = ctk.CTkLabel(self.left_frame, text="Tamaño de Fuente:")
@@ -226,3 +232,30 @@ class EquationSolver:
         if self.output_frame.winfo_children():
             for widget in self.output_frame.winfo_children():
                 widget.configure(font=("Arial", self.font_size))
+
+
+    def paste_matrix(self):
+        """Pega la matriz copiada desde el portapapeles en las casillas correspondientes."""
+        try:
+            # Leer el contenido del portapapeles
+            clipboard_content = self.tab.clipboard_get()
+
+            # Dividir las filas y columnas
+            rows = clipboard_content.strip().split("\n")
+            matrix_values = [row.split("\t") for row in rows]
+
+            # Validar si la matriz pegada coincide con las dimensiones generadas
+            if len(matrix_values) != len(self.matrix_entries) or any(
+                    len(row) != len(self.matrix_entries[0]) for row in matrix_values
+            ):
+                raise ValueError("La matriz pegada no coincide con las dimensiones actuales.")
+
+            # Rellenar las entradas de la matriz
+            for i, row in enumerate(matrix_values):
+                for j, value in enumerate(row):
+                    self.matrix_entries[i][j].delete(0, "end")
+                    self.matrix_entries[i][j].insert(0, value)
+
+            messagebox.showinfo("Éxito", "Matriz pegada correctamente.")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo pegar la matriz: {e}")
