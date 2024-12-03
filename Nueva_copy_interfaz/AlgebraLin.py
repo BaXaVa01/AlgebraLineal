@@ -55,7 +55,7 @@ class AlgebraLin(ctk.CTk):
         self.matrix_tab = MatricesTab(self.tabview)
         self.resolutorLU = EquationSolver(self.tabview)
         self.gauss = GaussJordanSolver(self.tabview)
-        self.cramer = CramerSolver(self.tabview)
+        self.cramer = MetodoCramer(self.tabview)
         self.comprobante = ComprobanteResultados(self.tabview)
 
         # Vincular el evento de cerrar ventana

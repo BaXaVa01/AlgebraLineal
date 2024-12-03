@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
-
+import numpy as np
+from fractions import Fraction
 
 class MetodoCramer:
     def __init__(self, tabview):
@@ -114,14 +115,77 @@ class MetodoCramer:
 
             # Activar el botón de solución
             self.solve_button.configure(state="normal")
+            self.copy_matrix_button.configure(state = "normal")
         except ValueError as e:
             messagebox.showerror("Error", f"Entrada inválida: {e}")
 
     def solve_system(self):
-        """Calcula la solución utilizando el Método de Cramer."""
-        # Aquí se implementará la lógica para resolver el sistema de ecuaciones usando el Método de Cramer.
-        messagebox.showinfo("Método de Cramer", "Funcionalidad en desarrollo.")
+        """Calcula la solución utilizando el Método de Cramer y muestra el paso a paso."""
+        try:
+            # Leer la matriz de coeficientes y términos independientes
+            coefficients, constants = self._read_matrix()
 
+            # Validar que el sistema tenga una solución única
+            det_main = np.linalg.det(coefficients)
+            if np.isclose(det_main, 0):
+                raise ValueError("El sistema no tiene solución única (determinante principal = 0).")
+
+            # Calcular determinantes y soluciones usando el Método de Cramer
+            steps = [f"Determinante principal (det): {det_main:.2f}"]
+            solutions = []
+            num_variables = len(coefficients)
+
+            for i in range(num_variables):
+                # Crear una copia de la matriz de coeficientes
+                modified_matrix = coefficients.copy()
+
+                # Reemplazar la columna i con el vector de términos independientes
+                modified_matrix[:, i] = constants
+
+                # Calcular el determinante de la matriz modificada
+                det_i = np.linalg.det(modified_matrix)
+                solution = det_i / det_main
+                solutions.append(solution)
+
+                # Registrar el paso a paso
+                steps.append(f"\nPaso {i + 1}: Reemplazar columna {i + 1} con los términos independientes.")
+                steps.append(f"Matriz modificada:\n{self._matrix_to_string(modified_matrix)}")
+                steps.append(f"Determinante de la matriz modificada (det_{i + 1}): {det_i:.2f}")
+                steps.append(f"x{i + 1} = det_{i + 1} / det = {det_i:.2f} / {det_main:.2f} = {solution:.2f}")
+
+            # Mostrar los pasos y la solución final
+            steps.append("\nSoluciones:")
+            for i, solution in enumerate(solutions):
+                steps.append(f"x{i + 1} = {solution:.2f}")
+
+            self._display_output("\n".join(steps))
+            messagebox.showinfo("Éxito", "Solución calculada correctamente. Revisa los pasos en la salida.")
+        except ValueError as e:
+            messagebox.showerror("Error", f"Entrada inválida o sistema inconsistente: {e}")
+        except Exception as e:
+            messagebox.showerror("Error inesperado", f"{e}")
+
+    def _read_matrix(self):
+        """Lee los valores de la matriz de entradas y los separa en A y B."""
+        coefficients = []
+        constants = []
+
+        for row in self.matrix_entries:
+            coeff_row = []
+            for j in range(len(row) - 1):
+                value = row[j].get().strip()
+                if not value:
+                    raise ValueError("Todas las entradas deben estar llenas.")
+                coeff_row.append(float(Fraction(value)))
+            coefficients.append(coeff_row)
+
+            # Leer el término independiente
+            constant_value = row[-1].get().strip()
+            if not constant_value:
+                raise ValueError("Todas las entradas deben estar llenas.")
+            constants.append(float(Fraction(constant_value)))
+
+        return np.array(coefficients), np.array(constants)
 
     def adjust_font_size(self, value):
         """Ajusta dinámicamente el tamaño de la fuente para la salida."""
@@ -171,6 +235,14 @@ class MetodoCramer:
         for widget in self.output_frame.winfo_children():
             widget.destroy()  # Limpiar cualquier salida anterior
 
+        output_label = ctk.CTkLabel(
+            self.output_frame,
+            text=content,
+            justify="left",
+            wraplength=680,
+            font=("Arial", 14)
+        )
+        output_label.pack(padx=10, pady=10)
 
     def copy_matrix(self):
         """Copia la matriz generada al portapapeles en formato tabular."""

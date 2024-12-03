@@ -10,7 +10,7 @@ class MatricesTab:
         self.tab = tabview.add("Matrices")
 
         # Contenedor principal desplazable
-        self.scrollable_frame = ctk.CTkScrollableFrame(self.tab, width=900, height=200)
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.tab, width=700, height=200)
         self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
         # Lista para almacenar matrices
@@ -39,7 +39,7 @@ class MatricesTab:
 
         # Actualizar el scrollable_frame
         self.scrollable_frame.update_idletasks()
-        self.scrollable_frame._canvas.configure(scrollregion=self.scrollable_frame._canvas.bbox("all"))
+        # self.scrollable_frame._canvas.configure(scrollregion=self.scrollable_frame._canvas.bbox("all"))
 
 
     def _create_matrix_frame(self):
