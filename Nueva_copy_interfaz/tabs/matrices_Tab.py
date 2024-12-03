@@ -52,7 +52,7 @@ class MatricesTab:
 
         # Botón para operar matrices
         self.operate_button = ctk.CTkButton(
-            self.bottom_frame, text="Operar Matrices", command=self.perform_operation
+            self.bottom_frame, text="Operar Matrices", command=self.process_general_operation
         )
         self.operate_button.pack(side="left", padx=5, pady=10)
 
@@ -487,3 +487,37 @@ class MatricesTab:
             messagebox.showinfo("Copiado", "La matriz ha sido copiada al portapapeles.")
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo copiar la matriz: {e}")
+
+    def process_general_operation(self):
+        """Procesa una operación general entre matrices."""
+        try:
+            # Leer la operación ingresada
+            operation = self.operation_entry.get().strip()
+            if not operation:
+                raise ValueError("Debe ingresar una operación válida.")
+
+            # Diccionario para almacenar las matrices con sus identificadores
+            matrices_dict = {frame.identifier: np.array(self.get_matrix_values(frame), dtype=float)
+                             for frame in self.matrices}
+
+            # Validar que las matrices mencionadas en la operación existen
+            for identifier in matrices_dict:
+                operation = operation.replace(identifier, f"matrices_dict['{identifier}']")
+
+            # Evaluar la operación
+            result = eval(operation)
+
+            # Validar el resultado (debe ser una matriz NumPy)
+            if not isinstance(result, np.ndarray):
+                raise ValueError("La operación no produjo una matriz válida.")
+
+            # Mostrar el resultado
+            self._display_result_general(result)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error en la operación: {e}")
+
+    def _display_result_general(self, result):
+        """Muestra el resultado de una operación general entre matrices."""
+        result_text = f"Resultado de la operación:\n\n{self._matrix_to_string(result)}"
+        self.results_label.configure(text=result_text)
