@@ -83,7 +83,7 @@ class ComprobanteResultados:
         self.results_entries = []  # Entradas de resultados esperados
 
     def generate_matrix(self):
-        """Genera la matriz de entradas y las casillas para los valores a comprobar."""
+        """Genera la matriz de entradas, las etiquetas de índices, y las casillas para los valores a comprobar."""
         try:
             num_variables = int(self.variables_entry.get())
             if num_variables <= 0:
@@ -98,22 +98,32 @@ class ComprobanteResultados:
             center_frame = ctk.CTkFrame(self.matrix_frame)
             center_frame.grid(row=0, column=0, sticky="nsew")
 
+            # Crear etiquetas para los índices de las columnas (x1, x2, ..., b)
+            for j in range(num_variables + 1):  # Columnas = variables + 1 (término independiente)
+                index_label = ctk.CTkLabel(
+                    center_frame,
+                    text=f"x{j + 1}" if j < num_variables else "b",
+                    width=50,
+                    anchor="center"
+                )
+                index_label.grid(row=0, column=j, padx=5, pady=5)
+
             # Crear la matriz de coeficientes y términos independientes
             for i in range(num_variables):
                 row_entries = []
-                for j in range(num_variables + 1):  # Columnas = variables + 1 (términos independientes)
+                for j in range(num_variables + 1):
                     entry = ctk.CTkEntry(center_frame, width=50, justify="center")
-                    entry.grid(row=i, column=j, padx=5, pady=5)
+                    entry.grid(row=i + 1, column=j, padx=5, pady=5)  # +1 para dejar espacio para las etiquetas
                     row_entries.append(entry)
                 self.matrix_entries.append(row_entries)
 
             # Crear casillas para los valores a comprobar
             verify_label = ctk.CTkLabel(center_frame, text="Comprobar:")
-            verify_label.grid(row=num_variables, column=0, columnspan=num_variables, pady=10)
+            verify_label.grid(row=num_variables + 1, column=0, columnspan=num_variables, pady=10)
 
             self.verify_entries = []
             verify_frame = ctk.CTkFrame(center_frame)
-            verify_frame.grid(row=num_variables + 1, column=0, columnspan=num_variables + 1, sticky="nsew", pady=10)
+            verify_frame.grid(row=num_variables + 2, column=0, columnspan=num_variables + 1, sticky="nsew", pady=10)
 
             for i in range(num_variables):
                 entry = ctk.CTkEntry(verify_frame, width=50, justify="center")
@@ -171,23 +181,41 @@ class ComprobanteResultados:
             messagebox.showerror("Error", f"No se pudo pegar la matriz: {e}")
 
     def check_solution(self):
-        """Compara los resultados calculados con los resultados esperados."""
+        """Compara los resultados calculados con los valores ingresados en las casillas de comprobación."""
         try:
+            # Leer la matriz de coeficientes y términos independientes
             coefficients, constants = self._read_matrix()
+
+            # Resolver el sistema de ecuaciones
             calculated_results = np.linalg.solve(coefficients, constants)
 
-            # Leer los resultados esperados
-            expected_results = [Fraction(entry.get()) for entry in self.results_entries]
+            # Leer los valores ingresados en las casillas de comprobación
+            verify_results = []
+            for entry in self.verify_entries:
+                value = entry.get()
+                if value.strip() == "":
+                    raise ValueError("Todas las casillas de comprobación deben estar llenas.")
+                verify_results.append(float(Fraction(value)))
 
-            # Comprobar si los resultados calculados coinciden con los esperados
-            for i, (calculated, expected) in enumerate(zip(calculated_results, expected_results)):
-                if not np.isclose(calculated, expected):
-                    messagebox.showwarning("Comprobación Fallida", f"x{i+1} no coincide:\nCalculado: {calculated:.2f}, Esperado: {expected}")
-                    return
+            # Comparar resultados calculados con los valores ingresados
+            mismatches = []
+            for i, (calculated, provided) in enumerate(zip(calculated_results, verify_results)):
+                if not np.isclose(calculated, provided):
+                    mismatches.append(f"x{i + 1}: Calculado = {calculated:.2f}, Ingresado = {provided}")
 
-            messagebox.showinfo("Éxito", "Todos los resultados coinciden.")
+            # Mostrar resultados de la comparación
+            if mismatches:
+                mismatch_message = "\n".join(mismatches)
+                messagebox.showwarning("Comprobación Fallida",
+                                       f"Los siguientes valores no coinciden:\n{mismatch_message}")
+            else:
+                messagebox.showinfo("Éxito", "Todos los resultados coinciden.")
+        except ValueError as e:
+            messagebox.showerror("Error", f"Entrada inválida: {e}")
+        except np.linalg.LinAlgError:
+            messagebox.showerror("Error", "El sistema no tiene solución única.")
         except Exception as e:
-            messagebox.showerror("Error", f"Error en la comprobación: {e}")
+            messagebox.showerror("Error", f"Error inesperado: {e}")
 
     def _read_matrix(self):
         """Lee los valores de la matriz de entradas y los separa en A y B."""
