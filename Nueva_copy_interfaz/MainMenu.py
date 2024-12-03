@@ -10,7 +10,7 @@ from tabs.reportes_tab import ReportesTab
 from tabs.secante_tab import SecanteTab
 from tabs.fakePosition_tab import FakePositionTab
 from tabs.Aprox_tab import AproxTab
-
+from AlgebraLin import AlgebraLin
 class MainMenu(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -61,8 +61,13 @@ class MainMenu(ctk.CTk):
 
     def open_matrix_calculator(self):
         """Abre la interfaz de Calculadora de Matrices."""
-        print("Calculadora de Matrices abierta")
-
+        self.background.pack_forget()
+        self.calc_button.place_forget()
+        self.analysis_button.place_forget()
+        self.footer_label.place_forget()
+        # Inicializar vista de análisis numérico si no existe
+        if not self.tabview:
+            self.initialize_matrix_interface()
     def open_numerical_analysis(self):
         """Abre la interfaz de Análisis Numérico."""
         # Ocultar elementos del menú principal
@@ -108,6 +113,13 @@ class MainMenu(ctk.CTk):
                 command=self.return_to_main_menu  # Nuevo método
             )
         self.back_button.place(relx=0, rely=0, x=10, y=10, anchor="nw")  # Posiciona en la esquina superior izquierda
+
+    def initialize_matrix_interface(self):
+        """Abre AlgebraLin y oculta el menú principal."""
+        self.withdraw()  # Oculta el menú principal
+        algebra_app = AlgebraLin(self)  # Pasa referencia al menú principal
+        algebra_app.mainloop()
+    
 
 
     def return_to_main_menu(self):
