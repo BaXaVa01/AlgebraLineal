@@ -46,7 +46,7 @@ class MatricesTab:
 
         # Entrada para la operación
         self.operation_entry = ctk.CTkEntry(
-            self.bottom_frame, width=200, placeholder_text="Ej: 3*A"
+            self.bottom_frame, width=200, placeholder_text="Ej: 3*A + 2*B"
         )
         self.operation_entry.pack(side="left", padx=5, pady=10)
 
@@ -80,6 +80,12 @@ class MatricesTab:
         # Etiqueta del identificador
         label = ctk.CTkLabel(frame, text=f"Matriz {identifier}", font=("Arial", 14))
         label.pack(pady=5)
+
+        # Botón para eliminar la matriz
+        modify_button = ctk.CTkButton(
+            frame, text="Eliminar matriz", command=lambda: self._remove_matrix(frame)
+        )
+        modify_button.pack(pady=5)
 
         # Sub-frame para las entradas de la matriz
         matrix_entries_frame = ctk.CTkFrame(frame)
@@ -361,6 +367,11 @@ class MatricesTab:
         popup.title(f"Modificar Dimensiones - {matrix_frame.identifier}")
         popup.geometry("300x200")
 
+        popup.transient(self.tab)
+
+        popup.grab_set()
+
+
         # Etiquetas y entradas para filas y columnas
         rows_label = ctk.CTkLabel(popup, text="Filas:")
         rows_label.pack(pady=5)
@@ -503,6 +514,9 @@ class MatricesTab:
             # Validar que las matrices mencionadas en la operación existen
             for identifier in matrices_dict:
                 operation = operation.replace(identifier, f"matrices_dict['{identifier}']")
+
+            # Reemplazar el operador * con @ para multiplicación matricial
+            # operation = operation.replace("*", "@")
 
             # Evaluar la operación
             result = eval(operation)
