@@ -7,6 +7,7 @@ from tabs.matrices_Tab import MatricesTab
 from tabs.graph_tab import GraphTab
 from tabs.ResolutorMatrix import EquationSolver
 from tabs.Gaus_tab import GaussJordanSolver
+from tabs.Cramer_tab import MetodoCramer
 # from tabs.algebra.cramer_Tab import CramerTab
 # from tabs.algebra.gauss_Tab import GaussTab
 # from tabs.algebra.gauss_jordan_Tab import GaussJordanTab
@@ -49,11 +50,12 @@ class AlgebraLin(ctk.CTk):
         self.tabview.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)  # Usar grid para mayor flexibilidad
 
         # Inicializar las pestañas
-        self.inversaDeMatriz_tab = InversaDeMatriz_Tab(self.tabview)
-        self.matrix_tab = MatricesTab(self.tabview)
+
         self.graficador_tab = GraphTab(self.tabview)
+        self.matrix_tab = MatricesTab(self.tabview)
         self.resolutorLU = EquationSolver(self.tabview)
         self.gauss = GaussJordanSolver(self.tabview)
+        self.cramer = CramerSolver(self.tabview)
         self.comprobante = ComprobanteResultados(self.tabview)
 
         # Vincular el evento de cerrar ventana
