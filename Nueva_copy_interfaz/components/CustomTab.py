@@ -8,20 +8,31 @@ import numpy as np
 class CustomTab:
     def __init__(self, tabview, tab_name, input_fields, table_columns, 
                  execute_callback=None, plot_step_callback=None):
-        self.tab = tabview.add(tab_name)
-        self.input_fields = input_fields
-        self.table_columns = table_columns
+        """
+        Constructor para inicializar una pestaña dentro de un CTkTabview o CTkFrame.
+        :param tabview: Puede ser un CTkTabview o un CTkFrame.
+        :param tab_name: Nombre de la pestaña (solo aplica para CTkTabview).
+        """
         self.inputs = {}
         self.current_step = 0
         self.previous_artists = []
         self.execute_callback = execute_callback  # Callback para ejecutar cálculos
         self.plot_step_callback = plot_step_callback  # Callback para graficar pasos
 
+        # Determinar si `tabview` es un CTkTabview o un CTkFrame
+        if hasattr(tabview, "add"):  # CTkTabview
+            self.tab = tabview.add(tab_name)
+        else:  # CTkFrame
+            self.tab = tabview
+
+        # Guardar campos de entrada y columnas de tabla
+        self.input_fields = input_fields
+        self.table_columns = table_columns
+
         # Configurar layout adaptable
         self.tab.grid_rowconfigure(0, weight=1)
         self.tab.grid_columnconfigure(0, weight=1)
         self.tab.grid_columnconfigure(1, weight=4)
-
         # Inicializar la interfaz de usuario
         self.init_ui()
 
@@ -36,6 +47,8 @@ class CustomTab:
         self.right_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
         self.right_frame.grid_rowconfigure(0, weight=2)
         self.right_frame.grid_rowconfigure(1, weight=1)
+        self.right_frame.grid_rowconfigure(2, weight=2)  # Fila para la tabla
+        self.right_frame.grid_rowconfigure(1, weight=0, minsize=50)  # Fila para los botones con tamaño fijo
         self.right_frame.grid_columnconfigure(0, weight=1)
 
         # Crear campos de entrada dinámicos
@@ -68,20 +81,13 @@ class CustomTab:
         btn_execute.grid(row=current_row, column=0, pady=10, padx=5, sticky="ew")
         current_row += 1
 
-        # Tabla
-        self.table = CTkTable(self.left_frame, columns=self.table_columns, height=150)
-        self.table.grid(row=current_row, column=0, pady=10, sticky="nsew")
-        current_row += 1
-
-        # Vincular la selección de filas en la tabla con la gráfica
-        self.table.tree.bind("<<TreeviewSelect>>", self.on_row_select)
         # Graficador
         self.graph_widget = GraphWidget(self.right_frame)
         self.graph_widget.grid(row=0, column=0, sticky="nsew", padx=10, pady=5)
 
-        # Contenedor de botones de navegación
+        # Contenedor de botones de navegación (scrollable)
         self.button_frame = ctk.CTkFrame(self.right_frame, fg_color="gray15", corner_radius=8)
-        self.button_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=5)
+        self.button_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
 
         # Botón para pasos previos
         self.btn_prev = ctk.CTkButton(self.button_frame, text="<--", command=self.plot_previous_step)
@@ -90,6 +96,13 @@ class CustomTab:
         # Botón para pasos siguientes
         self.btn_next = ctk.CTkButton(self.button_frame, text="-->", command=self.plot_next_step)
         self.btn_next.pack(side="right", padx=5, pady=5)
+
+        # Tabla
+        self.table = CTkTable(self.right_frame, columns=self.table_columns, height=150)
+        self.table.grid(row=2, column=0, pady=10, padx=5, sticky="nsew")
+
+        # Vincular la selección de filas en la tabla con la gráfica
+        self.table.tree.bind("<<TreeviewSelect>>", self.on_row_select)
 
 
     def on_row_select(self, event):

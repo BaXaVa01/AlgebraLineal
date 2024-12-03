@@ -63,7 +63,7 @@ def secante(funcion_str, x0, x1, tol=1e-6, max_iter=1000):
 
                 # Calcular error relativo
                 if i > 0:
-                    error_relativo = abs((x2 - x1) / x2)
+                    error_relativo = abs(x2 - x1)
 
                 # Almacenar la iteración
                 iteraciones.append({

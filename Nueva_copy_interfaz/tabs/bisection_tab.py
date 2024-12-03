@@ -11,15 +11,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSON_PATH = os.path.join(BASE_DIR, "files", "operaciones.json")
 
 class BisectionTab:
-    def __init__(self, tabview):
+    def __init__(self, parent):
         # Configurar campos de entrada y columnas de la tabla
         input_fieldsa = ["Función f(x)", "Límite inferior (a)", "Límite superior (b)", "Tolerancia", "Máximo de iteraciones"]
         table_columnsa = ["Iteración", "a", "b", "c", "Error", "f(a)", "f(b)", "f(c)"]
 
         # Crear una pestaña genérica usando CustomTab
         self.tab = CustomTab(
-            tabview=tabview,
-            tab_name="Bisección",
+            tabview=parent,
+            tab_name="Biseccion",
             input_fields=input_fieldsa,
             table_columns=table_columnsa,
             execute_callback=self.execute_bisection,
@@ -28,7 +28,7 @@ class BisectionTab:
                 # Crear la barra lateral asociada a la pestaña
         self.sidebar = FloatingSidebar(
             self.tab.tab,  # Usar la pestaña creada por CustomTab
-            title="Gifs Newton-Raphson",
+            title="Gifs Biseccion",
             from_right=True,
             width=250,
             height=500
@@ -54,7 +54,7 @@ class BisectionTab:
             raiz, error, pasos, iteraciones = biseccion(f, a, b, tol, max_iter)
 
             # Graficar la función
-            tab.graph_widget.plot_function(f, x_range=(a, b))
+            tab.graph_widget.plot_function(f, x_view=(a, b))
 
             # Insertar resultados en la tabla
             data = []
@@ -62,6 +62,14 @@ class BisectionTab:
                 iteracion, xi, xu, xr, Ea, yi, yu, yr = paso.split(", ")
                 data.append([iteracion, xi, xu, xr, Ea, yi, yu, yr])
             tab.table.insert_data(data)
+
+            # Mostrar los resultados clave en un MessageBox
+            messagebox.showinfo(
+                "Resultados del Método de Bisección",
+                f"Iteraciones: {iteraciones}\n"
+                f"Converge en: {raiz}\n"
+                f"Error absoluto: {error:.6f}"
+            )
 
             # Guardar operación en JSON
             variables = {"a": a, "b": b, "tol": tol, "max_iter": max_iter}
