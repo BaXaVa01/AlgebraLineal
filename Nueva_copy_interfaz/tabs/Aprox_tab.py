@@ -23,7 +23,7 @@ class AproxTab:
         # Lista desplegable para seleccionar método
         self.method_selector = ctk.CTkOptionMenu(
             self.select_frame,
-            values=["Bisección", "Newton-Raphson", "Secante", "Falsa Posición"],
+            values=["Biseccion", "Newton-Raphson", "Secante", "Falsa Posición"],
             command=self.load_method,
         )
         self.method_selector.pack(pady=10)
@@ -36,19 +36,16 @@ class AproxTab:
 
     def load_method(self, method_name):
         """Carga el método seleccionado y configura su contenido."""
-        # Limpiar el frame dinámico
         for widget in self.methods_frame.winfo_children():
             widget.destroy()
 
-        # Cargar contenido de la pestaña seleccionada
-        if method_name == "Bisección":
-            BisectionTab(parent=self.methods_frame)  # Crear instancia dentro del methods_frame
+        # Crear instancia del método seleccionado
+        if method_name == "Biseccion":
+            self.current_method = BisectionTab(self.methods_frame)
         elif method_name == "Newton-Raphson":
-            NewtonRaphsonTab(parent=self.methods_frame)
-            pass
+            self.current_method = NewtonRaphsonTab(self.methods_frame)
         elif method_name == "Secante":
-            SecanteTab(parent=self.methods_frame)
-            pass
+            self.current_method = SecanteTab(self.methods_frame)
         elif method_name == "Falsa Posición":
-            FakePositionTab(parent=self.methods_frame)
-            pass
+            self.current_method = FakePositionTab(self.methods_frame)
+

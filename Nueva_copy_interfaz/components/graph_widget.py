@@ -32,24 +32,47 @@ class GraphWidget(ctk.CTkFrame):
         # Conectar evento de zoom
         self.canvas.mpl_connect("scroll_event", self._zoom)
 
-    def plot_function(self, func, x_range=(-10, 10)):
-        """Dibuja la función `func` en un rango amplio de -100 a 100, pero establece el rango visible en `x_range`."""
+    def plot_function(self, func, x_view=(-10, 10), x_range=(-100, 100)):
+        """Dibuja la función `func` ajustando dinámicamente el rango del eje `y` y limitando la vista inicial."""
         self.func = func
-        self._initial_x_range = x_range
 
-        # Plotea en un rango extendido y ajusta la vista a `x_range`
-        self.update_plot_function(-100, 100)
-        self.ax.set_xlim(*x_range)
+        # Generar valores de x en el rango extendido
+        x_values = np.linspace(x_range[0], x_range[1], 10000)
+        try:
+            y_values = func(x_values)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al evaluar la función: {e}")
+            return
 
-        # Ajustar el eje y a la misma escala que x
-        range_span = max(abs(x_range[0]), abs(x_range[1]))
-        self.ax.set_ylim(-range_span, range_span)
+        # Limpiar y plotear
+        self.ax.clear()
+        self.ax.plot(x_values, y_values, label="f(x)", color="blue")
 
-        # Guardar los límites iniciales para restablecer zoom
-        self._initial_xlim = self.ax.get_xlim()
-        self._initial_ylim = self.ax.get_ylim()
+        # Configurar la vista inicial
+        x_min, x_max = x_view
+        x_range = x_max - x_min
 
+        # Ajustar el rango `y` para que sea proporcional a `x`
+        y_center = 0  # Puedes calcular el centro dinámicamente si lo prefieres
+        self.ax.set_xlim(x_min, x_max)
+        self.ax.set_ylim(y_center - x_range / 2, y_center + x_range / 2)
+
+        # Configurar la relación igualada entre ejes
+        self.ax.set_aspect("equal", adjustable="datalim")
+
+        # Configurar leyenda y ejes
+        self.ax.axhline(0, color="black", linewidth=1)
+        self.ax.axvline(0, color="black", linewidth=1)
+        self.ax.set_xlabel("x")
+        self.ax.set_ylabel("f(x)")
+        self.ax.set_title("Gráfica de la función")
+        self.ax.legend()
+
+        # Dibujar en el canvas
         self.canvas.draw()
+
+
+
 
     def update_plot_function(self, x_min, x_max):
         """Actualiza el gráfico de la función en un rango extendido."""
@@ -106,11 +129,12 @@ class GraphWidget(ctk.CTkFrame):
         self.canvas.draw()
 
     def reset_zoom(self):
-        """Restablece el zoom al estado inicial."""
-        if self._initial_xlim and self._initial_ylim:
-            self.ax.set_xlim(self._initial_xlim)
-            self.ax.set_ylim(self._initial_ylim)
+        """Restablece la vista inicial a -10 a 10."""
+        if self._initial_x_range and self._initial_y_range:
+            self.ax.set_xlim(self._initial_x_range)
+            self.ax.set_ylim(self._initial_y_range)
             self.canvas.draw()
+
 
     def plot_points(self, points):
         """Grafica puntos individuales en el eje actual."""
@@ -134,40 +158,19 @@ class GraphWidget(ctk.CTkFrame):
         self.canvas.draw()
 
     def plot_multiple_functions(self, functions):
-        """
-        Grafica múltiples funciones en el mismo gráfico utilizando `plot_function`.
-        
-        Input:
-        - functions (list): Una lista de diccionarios. Cada diccionario debe tener los siguientes campos:
-        
-          - 'func' (callable, obligatorio): La función matemática que se desea graficar.
-            Ejemplo: lambda x: x**2 o numpy.sin.
-        
-          - 'x_range' (tuple, opcional): Una tupla que define el rango visible del eje x (x_min, x_max).
-            Si no se especifica, se utiliza el rango predeterminado (-10, 10).
-            Ejemplo: (-20, 20)
-        
-          - 'label' (str, opcional): Una etiqueta para identificar la función en la leyenda.
-            Si no se especifica, se utiliza "f(x)" como etiqueta predeterminada.
-            Ejemplo: "sin(x)"
-        
-          - 'color' (str, opcional): El color de la línea del gráfico. Puede ser cualquier color válido en Matplotlib.
-            Si no se especifica, Matplotlib asigna un color automáticamente.
-            Ejemplo: "blue", "#FF5733", "r"
-        
-        Ejemplo de uso:
-            functions_to_plot = [
-                {"func": np.sin, "x_range": (-10, 10), "label": "sin(x)", "color": "blue"},
-                {"func": np.cos, "label": "cos(x)", "color": "green"},
-                {"func": lambda x: x**2 - 5, "x_range": (-5, 5), "label": "x^2 - 5", "color": "red"}
-            ]
-            graph_widget.plot_multiple_functions(functions_to_plot)
-        """
-        self.ax.clear()  # Limpia cualquier gráfico previo
+        """Grafica múltiples funciones con una escala igual en los ejes."""
+        self.ax.clear()
+        x_range = (-100, 100)
+        x_view = (-10, 10)
 
+        # Determinar límites iniciales para y
+        x_min, x_max = x_view
+        x_range_width = x_max - x_min
+        y_center = 0  # Ajusta según tus necesidades
+
+        # Graficar cada función
         for item in functions:
             func = item.get("func")
-            x_range = item.get("x_range", (-10, 10))  # Rango predeterminado si no se especifica
             label = item.get("label", "f(x)")
             color = item.get("color", None)
 
@@ -175,29 +178,28 @@ class GraphWidget(ctk.CTkFrame):
                 continue
 
             try:
-                # Genera valores x e y para graficar la función
-                x_values = np.linspace(-100, 100, 10000)  # Rango extendido
+                x_values = np.linspace(x_range[0], x_range[1], 1000)
                 y_values = func(x_values)
-                
-                # Dibuja la función
                 self.ax.plot(x_values, y_values, label=label, color=color)
-                
-                # Ajusta los límites del gráfico para la función actual si se especifica un rango
-                if x_range:
-                    self.ax.set_xlim(*x_range)
-
             except Exception as e:
                 messagebox.showerror("Error", f"Error al evaluar una de las funciones: {e}")
 
-        # Dibujar ejes comunes
+        # Configurar la vista inicial
+        self.ax.set_xlim(*x_view)
+        self.ax.set_ylim(y_center - x_range_width / 2, y_center + x_range_width / 2)
+
+        # Configurar la relación igualada entre ejes
+        self.ax.set_aspect("equal", adjustable="datalim")
+
+        # Configurar leyenda y ejes
         self.ax.axhline(0, color="black", linewidth=1)
         self.ax.axvline(0, color="black", linewidth=1)
-
-        # Etiquetas y leyenda
         self.ax.set_xlabel("x")
         self.ax.set_ylabel("f(x)")
         self.ax.set_title("Gráfica de múltiples funciones")
         self.ax.legend()
 
-        # Redibuja el canvas
         self.canvas.draw()
+
+
+

@@ -19,7 +19,7 @@ class BisectionTab:
         # Crear una pestaña genérica usando CustomTab
         self.tab = CustomTab(
             tabview=parent,
-            tab_name="Bisección",
+            tab_name="Biseccion",
             input_fields=input_fieldsa,
             table_columns=table_columnsa,
             execute_callback=self.execute_bisection,
@@ -28,7 +28,7 @@ class BisectionTab:
                 # Crear la barra lateral asociada a la pestaña
         self.sidebar = FloatingSidebar(
             self.tab.tab,  # Usar la pestaña creada por CustomTab
-            title="Gifs Newton-Raphson",
+            title="Gifs Biseccion",
             from_right=True,
             width=250,
             height=500
@@ -54,7 +54,7 @@ class BisectionTab:
             raiz, error, pasos, iteraciones = biseccion(f, a, b, tol, max_iter)
 
             # Graficar la función
-            tab.graph_widget.plot_function(f, x_range=(a, b))
+            tab.graph_widget.plot_function(f, x_view=(a, b))
 
             # Insertar resultados en la tabla
             data = []
