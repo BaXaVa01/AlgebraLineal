@@ -4,6 +4,7 @@ from tabs.algebra.inversaDeMatriz_Tab import InversaDeMatriz_Tab
 from tabs.matrices_Tab import MatricesTab
 from tabs.graph_tab import GraphTab
 from tabs.ResolutorMatrix import EquationSolver
+from tabs.Gaus_tab import GaussJordanSolver
 # from tabs.algebra.cramer_Tab import CramerTab
 # from tabs.algebra.gauss_Tab import GaussTab
 # from tabs.algebra.gauss_jordan_Tab import GaussJordanTab
@@ -50,6 +51,7 @@ class AlgebraLin(ctk.CTk):
         self.matrix_tab = MatricesTab(self.tabview)
         self.graficador_tab = GraphTab(self.tabview)
         self.resolutorLU = EquationSolver(self.tabview)
+        self.gauss = GaussJordanSolver(self.tabview)
 
         # Vincular el evento de cerrar ventana
         self.protocol("WM_DELETE_WINDOW", self.on_close)

@@ -109,6 +109,7 @@ class EquationSolver:
             # Activar los botones de solución
             self.solve_button.configure(state="normal")
             self.steps_button.configure(state="normal")
+            self.copy_matrix_button.configure(state = "normal")
         except ValueError as e:
             messagebox.showerror("Error", f"Entrada inválida: {e}")
 
@@ -116,13 +117,8 @@ class EquationSolver:
         """Resuelve el sistema de ecuaciones utilizando la matriz ingresada."""
         try:
             coefficients, constants = self._read_matrix()
-
             if self._check_equivalent_rows(coefficients):
                 self._display_output("Equivalentes (Número infinito de soluciones)")
-                return
-
-            if self._check_parallel_rows(coefficients, constants):
-                self._display_output("Rectas paralelas (Sistema sin solución)")
                 return
 
             if np.linalg.det(coefficients) == 0:
@@ -138,17 +134,6 @@ class EquationSolver:
             self._display_output(f"Error: {e}")
         except Exception as e:
             self._display_output(f"Error inesperado: {e}")
-
-    def _check_parallel_rows(self, coefficients, constants):
-        """Verifica si las filas representan rectas paralelas."""
-        num_rows = coefficients.shape[0]
-        for i in range(num_rows):
-            for j in range(i + 1, num_rows):
-                if np.allclose(coefficients[i] / coefficients[j],
-                               coefficients[i][0] / coefficients[j][0]) and not np.isclose(constants[i] / constants[j],
-                                                                                           constants[i]):
-                    return True
-        return False
 
     def show_steps(self):
         """Muestra el paso a paso del cálculo utilizando factorización LU."""
