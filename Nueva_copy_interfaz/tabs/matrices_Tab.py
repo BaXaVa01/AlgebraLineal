@@ -466,17 +466,24 @@ class MatricesTab:
             messagebox.showerror("Error", f"No se pudo copiar la matriz: {e}")
 
     def copy_result_to_clipboard(self):
-        """Copia el resultado mostrado al portapapeles."""
+        """Copia solo la matriz mostrada al portapapeles."""
         try:
             # Obtener el texto del label de resultados
             result_text = self.results_label.cget("text")
             if not result_text.strip():
                 raise ValueError("No hay resultados para copiar.")
 
-            # Copiar el texto al portapapeles
+            # Extraer únicamente la matriz (asumiendo que comienza después de un salto de línea doble)
+            matrix_start = result_text.find("\n\n") + 2
+            if matrix_start <= 1:  # Si no encuentra el formato esperado
+                raise ValueError("No se pudo encontrar una matriz válida en el resultado.")
+
+            matrix_text = result_text[matrix_start:].strip()
+
+            # Copiar la matriz al portapapeles
             self.tab.clipboard_clear()
-            self.tab.clipboard_append(result_text.strip())
+            self.tab.clipboard_append(matrix_text)
             self.tab.update()  # Actualizar el portapapeles
-            messagebox.showinfo("Copiado", "El resultado ha sido copiado al portapapeles.")
+            messagebox.showinfo("Copiado", "La matriz ha sido copiada al portapapeles.")
         except Exception as e:
-            messagebox.showerror("Error", f"No se pudo copiar el resultado: {e}")
+            messagebox.showerror("Error", f"No se pudo copiar la matriz: {e}")
