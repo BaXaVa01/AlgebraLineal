@@ -56,6 +56,13 @@ class MatricesTab:
         )
         self.operate_button.pack(side="left", padx=5, pady=10)
 
+        # Botón para copiar el resultado al portapapeles
+        self.copy_result_button = ctk.CTkButton(
+            self.bottom_frame, text="Copiar Resultado", command=self.copy_result_to_clipboard
+        )
+
+        self.copy_result_button.pack(side="right", padx=5, pady=10)
+
         # Variables internas
         self.matrices = []
         self.matrix_count = 0  # Contador de matrices
@@ -106,6 +113,17 @@ class MatricesTab:
         # Botón para calcular el rango
         rank_button = ctk.CTkButton(
             frame, text="Rango", command=lambda: self.calculate_rank(frame)
+        )
+        rank_button.pack(pady=5)
+        # Botón para copiar
+        rank_button = ctk.CTkButton(
+            frame, text="Copy", command=lambda: self.copy_matrix(identifier)
+        )
+        rank_button.pack(pady=5)
+
+        # Botón para pegar
+        rank_button = ctk.CTkButton(
+            frame, text="Paste", command=lambda: self.paste_matrix(identifier)
         )
         rank_button.pack(pady=5)
 
@@ -230,17 +248,18 @@ class MatricesTab:
             frame.destroy()
             self.matrix_count -= 1
 
-
     def add_matrix_operations(self, frame, matrix_identifier):
         """Añade botones de operaciones debajo de cada matriz."""
         operations_frame = ctk.CTkFrame(frame)
-        operations_frame.pack(pady=(5, 10))
+        operations_frame.pack(pady=(7, 14))
 
         # Botones de operaciones individuales
-        ctk.CTkButton(operations_frame, text="Determinante", command=lambda: self.calculate_determinant(matrix_identifier)).pack(pady=2)
-        ctk.CTkButton(operations_frame, text="Inversa", command=lambda: self.calculate_inverse(matrix_identifier)).pack(pady=2)
-        ctk.CTkButton(operations_frame, text="Transponer", command=lambda: self.transpose_matrix(matrix_identifier)).pack(pady=2)
-        ctk.CTkButton(operations_frame, text="Rango", command=lambda: self.calculate_rank(matrix_identifier)).pack(pady=2)
+        ctk.CTkButton(operations_frame, text="Copy", command=lambda: self.copy_matrix(matrix_identifier)).pack(pady=2)
+        ctk.CTkButton(operations_frame, text="Paste", command=lambda: self.paste_matrix(matrix_identifier)).pack(pady=2)
+        ctk.CTkButton(operations_frame, text="Determinante", command=lambda: self.calculate_determinant(frame)).pack(pady=2)
+        ctk.CTkButton(operations_frame, text="Inversa", command=lambda: self.calculate_inverse(frame)).pack(pady=2)
+        ctk.CTkButton(operations_frame, text="Transponer", command=lambda: self.calculate_transpose(frame)).pack(pady=2)
+        ctk.CTkButton(operations_frame, text="Rango", command=lambda: self.calculate_rank(frame)).pack(pady=2)
 
     def add_global_operations(self):
         """Añade botones para operaciones entre matrices."""
@@ -393,3 +412,71 @@ class MatricesTab:
         except ValueError as e:
             messagebox.showerror("Error", f"Entrada inválida: {e}")
 
+    def paste_matrix(self, matrix_identifier):
+        """Pega la matriz copiada desde el portapapeles en las casillas correspondientes."""
+        try:
+            # Obtener el frame de la matriz basado en el identificador
+            matrix_frame = next((frame for frame in self.matrices if frame.identifier == matrix_identifier), None)
+            if not matrix_frame:
+                raise ValueError(f"No se encontró la matriz con identificador '{matrix_identifier}'.")
+
+            # Leer el contenido del portapapeles
+            clipboard_content = self.tab.clipboard_get()
+
+            # Dividir las filas y columnas
+            rows = clipboard_content.strip().split("\n")
+            matrix_values = [row.split("\t") for row in rows]
+
+            # Validar si la matriz pegada coincide con las dimensiones generadas
+            if len(matrix_values) != len(matrix_frame.entries) or any(
+                    len(row) != len(matrix_frame.entries[0]) for row in matrix_values
+            ):
+                raise ValueError("La matriz pegada no coincide con las dimensiones actuales.")
+
+            # Rellenar las entradas de la matriz
+            for i, row in enumerate(matrix_values):
+                for j, value in enumerate(row):
+                    matrix_frame.entries[i][j].delete(0, "end")
+                    matrix_frame.entries[i][j].insert(0, value)
+
+            messagebox.showinfo("Éxito", f"Matriz '{matrix_identifier}' pegada correctamente.")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo pegar la matriz: {e}")
+
+    def copy_matrix(self, matrix_identifier):
+        """Copia la matriz seleccionada al portapapeles en formato tabular."""
+        try:
+            # Obtener el frame de la matriz basado en el identificador
+            matrix_frame = next((frame for frame in self.matrices if frame.identifier == matrix_identifier), None)
+            if not matrix_frame:
+                raise ValueError(f"No se encontró la matriz con identificador '{matrix_identifier}'.")
+
+            # Leer los valores de la matriz
+            matrix_str = ""
+            for row in matrix_frame.entries:
+                row_str = "\t".join(entry.get() or "0" for entry in row)
+                matrix_str += row_str + "\n"
+
+            # Copiar al portapapeles
+            self.tab.clipboard_clear()
+            self.tab.clipboard_append(matrix_str.strip())
+            self.tab.update()  # Actualizar el portapapeles
+            messagebox.showinfo("Copiado", f"Matriz '{matrix_identifier}' copiada al portapapeles.")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo copiar la matriz: {e}")
+
+    def copy_result_to_clipboard(self):
+        """Copia el resultado mostrado al portapapeles."""
+        try:
+            # Obtener el texto del label de resultados
+            result_text = self.results_label.cget("text")
+            if not result_text.strip():
+                raise ValueError("No hay resultados para copiar.")
+
+            # Copiar el texto al portapapeles
+            self.tab.clipboard_clear()
+            self.tab.clipboard_append(result_text.strip())
+            self.tab.update()  # Actualizar el portapapeles
+            messagebox.showinfo("Copiado", "El resultado ha sido copiado al portapapeles.")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo copiar el resultado: {e}")
