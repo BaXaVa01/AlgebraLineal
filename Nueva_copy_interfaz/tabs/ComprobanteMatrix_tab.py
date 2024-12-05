@@ -62,7 +62,7 @@ class ComprobanteResultados:
 
 
         # Frame derecho para la matriz
-        self.matrix_frame = ctk.CTkFrame(self.main_frame)
+        self.matrix_frame = ctk.CTkScrollableFrame(self.main_frame)
         self.matrix_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
 
         # Configurar el centrado de la matriz
@@ -181,41 +181,60 @@ class ComprobanteResultados:
             messagebox.showerror("Error", f"No se pudo pegar la matriz: {e}")
 
     def check_solution(self):
-        """Compara los resultados calculados con los valores ingresados en las casillas de comprobación."""
+        """Compara los resultados calculados con los valores ingresados en las casillas de comprobación y muestra el paso a paso."""
         try:
             # Leer la matriz de coeficientes y términos independientes
             coefficients, constants = self._read_matrix()
 
-            # Resolver el sistema de ecuaciones
-            calculated_results = np.linalg.solve(coefficients, constants)
+            # Validar que todos los valores son numéricos
+            coefficients = coefficients.astype(float)
+            constants = constants.astype(float)
 
             # Leer los valores ingresados en las casillas de comprobación
             verify_results = []
             for entry in self.verify_entries:
-                value = entry.get()
-                if value.strip() == "":
+                value = entry.get().strip()
+                if not value:
                     raise ValueError("Todas las casillas de comprobación deben estar llenas.")
                 verify_results.append(float(Fraction(value)))
 
-            # Comparar resultados calculados con los valores ingresados
+            # Generar paso a paso de la comprobación
+            steps = []
             mismatches = []
-            for i, (calculated, provided) in enumerate(zip(calculated_results, verify_results)):
-                if not np.isclose(calculated, provided):
-                    mismatches.append(f"x{i + 1}: Calculado = {calculated:.2f}, Ingresado = {provided}")
+            for i, (coeff_row, constant) in enumerate(zip(coefficients, constants)):
+                # Construir la ecuación con los valores ingresados
+                terms = [
+                    f"{coeff}({verify_results[j]})"
+                    for j, coeff in enumerate(coeff_row)
+                ]
+                equation_lhs = " + ".join(terms)
+                calculated_lhs = sum(c * x for c, x in zip(coeff_row, verify_results))
 
-            # Mostrar resultados de la comparación
+                # Comparar con el término independiente
+                if not np.isclose(calculated_lhs, constant):
+                    mismatches.append(
+                        f"Ecuación {i + 1}: {equation_lhs} = {calculated_lhs:.2f} ≠ {constant}"
+                    )
+                else:
+                    steps.append(
+                        f"Ecuación {i + 1}: {equation_lhs} = {calculated_lhs:.2f} = {constant}"
+                    )
+
+            # Mostrar el resultado del paso a paso
             if mismatches:
-                mismatch_message = "\n".join(mismatches)
+                steps.extend(mismatches)
+                self._display_output("\n".join(steps))
                 messagebox.showwarning("Comprobación Fallida",
-                                       f"Los siguientes valores no coinciden:\n{mismatch_message}")
+                                       "Algunas ecuaciones no coinciden. Revisa los pasos en la salida.")
             else:
-                messagebox.showinfo("Éxito", "Todos los resultados coinciden.")
+                self._display_output("\n".join(steps))
+                messagebox.showinfo("Éxito", "Todas las ecuaciones coinciden. Revisa los pasos en la salida.")
         except ValueError as e:
             messagebox.showerror("Error", f"Entrada inválida: {e}")
         except np.linalg.LinAlgError:
             messagebox.showerror("Error", "El sistema no tiene solución única.")
         except Exception as e:
-            messagebox.showerror("Error", f"Error inesperado: {e}")
+            messagebox.showerror("Error inesperado", f"{e}")
 
     def _read_matrix(self):
         """Lee los valores de la matriz de entradas y los separa en A y B."""
@@ -239,3 +258,10 @@ class ComprobanteResultados:
                 widget.configure(font=("Arial", self.font_size))
 
 
+    def _display_output(self, content):
+        """Muestra el contenido en el frame de salida desplazable."""
+        for widget in self.output_frame.winfo_children():
+            widget.destroy()  # Limpiar cualquier salida anterior
+
+        output_label = ctk.CTkLabel(self.output_frame, text=content, justify="left", wraplength=680, font=("Arial", 14))
+        output_label.pack(padx=10, pady=10)

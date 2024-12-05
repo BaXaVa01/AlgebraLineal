@@ -39,7 +39,7 @@ class AnalisisNum(ctk.CTk):
 
         # Crear e inicializar pestañas
         self.intro_tab = IntroTab(self.tabview)
-        self.calculator_tab = CalculatorTab(self.tabview)
+        # self.calculator_tab = CalculatorTab(self.tabview)
         self.graph_tab = GraphTab(self.tabview)
         self.aprox_tab = AproxTab(self.tabview)  # Agregar la nueva pestaña "Aproximar"
         self.settings_tab = SettingsTab(self.tabview)
