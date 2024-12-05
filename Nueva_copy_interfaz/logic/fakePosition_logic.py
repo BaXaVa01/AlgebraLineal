@@ -61,7 +61,7 @@ def falsa_posicion(funcion_str, a, b, tol=1e-6, max_iter=1000):
         fc = f(c)
 
         # Almacenar resultados de la iteración
-        iteraciones.append({"iteracion": i, "a": a, "b": b, "c": c, "f(c)": fc, "error_relativo": abs(b-a)})
+        iteraciones.append({"iteracion": i, "a": a, "b": b, "c": c, "f(c)": fc, "error_relativo": abs(b-c)})
 
         # Verificar convergencia
         if abs(fc) < tol or abs(b - a) < tol:
