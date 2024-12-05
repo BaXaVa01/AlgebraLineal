@@ -17,36 +17,24 @@ from tabs.settings_tab import SettingsTab, initialize_fonts
 from tabs.reportes_tab import ReportesTab  # Importar la nueva pestaña de Reportes
 from components.sidebar import FloatingSidebar
 
-class AlgebraLin(ctk.CTk):
-    def __init__(self, parent_menu):
-        super().__init__()
+class AlgebraLin(ctk.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
 
-        # Guardar referencia al menú principal
-        self.parent_menu = parent_menu
-
-        # Configuración de la ventana principal
-        self.title("Aplicación de metodos matriciales")
-        window_width = 1000
-        window_height = 600
-        screen_width = self.winfo_screenwidth()
-        screen_height = self.winfo_screenheight()
-        x = (screen_width // 2) - (window_width // 2)
-        y = (screen_height // 2) - (window_height // 2)
-        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
-        self.minsize(800, 500)  # Tamaño mínimo para evitar problemas de visualización
-        self.set_appearance()
-                
-
-        # Inicializar las fuentes después de crear la raíz
-        initialize_fonts()
+        # Configuración del contenedor
+        self.master = master
+        self.pack(fill="both", expand=True)
 
         # Configurar el layout adaptable
         self.grid_rowconfigure(0, weight=1)  # Hacer que el Tabview se expanda verticalmente
         self.grid_columnconfigure(0, weight=1)  # Hacer que el Tabview se expanda horizontalmente
 
+        # Inicializar las fuentes después de crear la raíz
+        initialize_fonts()
+
         # Crear y empaquetar el Tabview principal
         self.tabview = ctk.CTkTabview(self)
-        self.tabview.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)  # Usar grid para mayor flexibilidad
+        self.tabview.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
         # Inicializar las pestañas
         self.inversaDeMatriz_tab = InversaDeMatriz_Tab(self.tabview)
@@ -56,8 +44,6 @@ class AlgebraLin(ctk.CTk):
         self.gauss = GaussJordanSolver(self.tabview)
         self.comprobante = ComprobanteResultados(self.tabview)
 
-        # Vincular el evento de cerrar ventana
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
         
     def set_appearance(self):
         """Configura el modo de apariencia y el tema de color."""

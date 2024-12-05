@@ -60,81 +60,74 @@ class MainMenu(ctk.CTk):
         self.tabview = None
 
     def open_matrix_calculator(self):
-        """Abre la interfaz de Calculadora de Matrices."""
-        self.background.pack_forget()
-        self.calc_button.place_forget()
-        self.analysis_button.place_forget()
-        self.footer_label.place_forget()
-        # Inicializar vista de análisis numérico si no existe
-        if not self.tabview:
-            self.initialize_matrix_interface()
+        """Abre una ventana independiente para la Calculadora de Matrices."""
+        # Ocultar el menú principal
+        self.withdraw()
+
+        # Crear una nueva ventana para la calculadora de matrices
+        calculator_window = ctk.CTkToplevel(self)
+        calculator_window.title("Calculadora de Matrices")
+        calculator_window.geometry("800x600")
+
+        # Instanciar la interfaz de AlgebraLin dentro de la nueva ventana
+        algebra_app = AlgebraLin(calculator_window)
+        algebra_app.pack(fill="both", expand=True)
+
+        # Manejar cierre de la ventana secundaria y restaurar el menú principal
+        calculator_window.protocol("WM_DELETE_WINDOW", lambda: self.on_close_secondary(calculator_window))
+
     def open_numerical_analysis(self):
-        """Abre la interfaz de Análisis Numérico."""
-        # Ocultar elementos del menú principal
-        self.background.pack_forget()
-        self.calc_button.place_forget()
-        self.analysis_button.place_forget()
-        self.footer_label.place_forget()
+        """Abre una ventana independiente para el Análisis Numérico."""
+        # Ocultar el menú principal
+        self.withdraw()
 
-        # Inicializar vista de análisis numérico si no existe
-        if not self.tabview:
-            self.initialize_numerical_analysis()
+        # Crear una nueva ventana para el análisis numérico
+        analysis_window = ctk.CTkToplevel(self)
+        analysis_window.title("Análisis Numérico")
+        analysis_window.geometry("800x600")
 
+        # Inicializar TabView dentro de la nueva ventana
+        self.initialize_numerical_analysis_in(analysis_window)
 
-    def initialize_numerical_analysis(self):
-        """Crea la vista de análisis numérico dentro del menú principal."""
+        # Manejar cierre de la ventana secundaria y restaurar el menú principal
+        analysis_window.protocol("WM_DELETE_WINDOW", lambda: self.on_close_secondary(analysis_window))
+
+    def on_close_secondary(self, window):
+        """Maneja el cierre de ventanas secundarias y restaura el menú principal."""
+        window.destroy()
+        self.deiconify()  # Restaurar el menú principal
+
+    def initialize_numerical_analysis_in(self, parent):
+        """Crea la vista de análisis numérico en un contenedor específico."""
         initialize_fonts()
 
         # Configurar layout adaptable
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        parent.grid_rowconfigure(0, weight=1)
+        parent.grid_columnconfigure(0, weight=1)
 
-        # Crear TabView principal
-        self.tabview = ctk.CTkTabview(self)
-        self.tabview.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        # Crear TabView principal dentro del contenedor
+        tabview = ctk.CTkTabview(parent)
+        tabview.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
         # Crear e inicializar pestañas
-        self.intro_tab = IntroTab(self.tabview)
-        self.calculator_tab = CalculatorTab(self.tabview)
-        self.graph_tab = GraphTab(self.tabview)
-        self.aprox_tab = AproxTab(self.tabview)
-        self.settings_tab = SettingsTab(self.tabview)
-        self.reportes_tab = ReportesTab(self.tabview)
+        IntroTab(tabview)
+        CalculatorTab(tabview)
+        GraphTab(tabview)
+        AproxTab(tabview)
+        SettingsTab(tabview)
+        ReportesTab(tabview)
 
-        self.back_button = ctk.CTkButton(
-                self,
-                text="  Regresar al Menú Principal",  # Espaciado para separar el texto del borde
-                font=ctk.CTkFont(size=14),  # Tamaño de texto más pequeño
-                fg_color="#2E2E2E",  # Color de fondo
-                text_color="#FFFFFF",  # Color del texto
-                width=200,  # Ancho del botón
-                height=30,  # Altura del botón
-                anchor="w",  # Alinear texto a la izquierda
-                command=self.return_to_main_menu  # Nuevo método
-            )
-        self.back_button.place(relx=0, rely=0, x=10, y=10, anchor="nw")  # Posiciona en la esquina superior izquierda
+        # Botón para cerrar la ventana
+        back_button = ctk.CTkButton(
+            parent,
+            text="Regresar al Menú Principal",
+            font=ctk.CTkFont(size=14),
+            fg_color="#2E2E2E",
+            text_color="#FFFFFF",
+            command=lambda: self.on_close_secondary(parent)
+        )
+        back_button.place(relx=0.05, rely=0.05)
 
-    def initialize_matrix_interface(self):
-        """Abre AlgebraLin y oculta el menú principal."""
-        self.withdraw()  # Oculta el menú principal
-        algebra_app = AlgebraLin(self)  # Pasa referencia al menú principal
-        algebra_app.mainloop()
-    
-
-
-    def return_to_main_menu(self):
-        """Regresa al menú principal."""
-        if self.tabview:  # Asegura que las pestañas existan
-            self.tabview.destroy()
-            self.tabview = None  # Restablece el TabView
-        if hasattr(self, "back_button"):
-            self.back_button.destroy()
-
-        # Restaurar elementos iniciales del menú principal
-        self.background.pack(fill="both", expand=True)
-        self.calc_button.place(relx=0.5, rely=0.4, anchor="center")
-        self.analysis_button.place(relx=0.5, rely=0.6, anchor="center")
-        self.footer_label.place(relx=0.5, rely=0.95, anchor="center")
 
 
 
