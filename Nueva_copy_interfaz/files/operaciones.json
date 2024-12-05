@@ -100,6 +100,16 @@
                 },
                 "dx": "<function _lambdifygenerated at 0x000002B0EBB20FE0>",
                 "resultado": 0.4348413683303566
+            },
+            {
+                "funcion": "x**2*cos(x)",
+                "variables": {
+                    "x0": 1.0,
+                    "tol": 1e-05,
+                    "max_iter": 1000
+                },
+                "dx": "<function _lambdifygenerated at 0x000002165BBDB1A0>",
+                "resultado": -1.5707963267948968
             }
         ]
     },
@@ -248,6 +258,16 @@
                     "max_iter": 10000
                 },
                 "resultado": 0.6100312845857668
+            },
+            {
+                "funcion": "x**2*cos(x)",
+                "variables": {
+                    "x0": 1.0,
+                    "x1": 3.0,
+                    "tol": 0.0001,
+                    "max_iter": 1000
+                },
+                "resultado": 1.5707962277665004
             }
         ]
     },
@@ -312,6 +332,16 @@
                     "max_iter": 10000
                 },
                 "resultado": -9.354498300896162e-06
+            },
+            {
+                "funcion": "x**2*cos(x)",
+                "variables": {
+                    "a": 3.0,
+                    "b": 1.0,
+                    "tol": 0.0001,
+                    "max_iter": 10000
+                },
+                "resultado": 1.5707703436135227
             }
         ]
     }
