@@ -310,6 +310,12 @@ class MatricesTab:
             # Calcular la inversa
             inverse_matrix = np.linalg.inv(matrix_array)
 
+            # Verificar si es realmente la inversa (comprobar con la identidad)
+            identity = np.eye(matrix_array.shape[0])
+            product = np.dot(matrix_array, inverse_matrix)
+            if not np.allclose(product, identity, atol=1e-8):
+                raise ValueError("El resultado no es exactamente una matriz identidad debido a errores numéricos.")
+
             # Mostrar el resultado en el frame de resultados
             result_text = f"Inversa de la matriz:\n\n{self._matrix_to_string(inverse_matrix)}"
             self.results_label.configure(text=result_text)
