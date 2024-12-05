@@ -63,6 +63,15 @@ class MatricesTab:
 
         self.copy_result_button.pack(side="right", padx=5, pady=10)
 
+        # Botón para mostrar detalles de operacion
+        self.copy_result_button = ctk.CTkButton(
+            self.bottom_frame, text="Mostrar detalles", command=self.copy_result_to_clipboard
+        )
+
+        self.copy_result_button.pack(side="right", padx=5, pady=10)
+
+
+
         # Variables internas
         self.matrices = []
         self.matrix_count = 0  # Contador de matrices
@@ -116,11 +125,11 @@ class MatricesTab:
         )
         transpose_button.pack(pady=5)
 
-        # Botón para calcular el rango
-        rank_button = ctk.CTkButton(
-            frame, text="Rango", command=lambda: self.calculate_rank(frame)
-        )
-        rank_button.pack(pady=5)
+        # # Botón para calcular el rango
+        # rank_button = ctk.CTkButton(
+        #     frame, text="Rango", command=lambda: self.calculate_rank(frame)
+        # )
+        # rank_button.pack(pady=5)
         # Botón para copiar
         rank_button = ctk.CTkButton(
             frame, text="Copy", command=lambda: self.copy_matrix(identifier)
